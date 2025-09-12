@@ -1,6 +1,6 @@
 // 이 파일은 서버에서만 실행되므로, 여기에 있는 API 키는 절대 노출되지 않습니다.
 // Netlify 환경 변수에서 API 키를 가져옵니다.
-const GEMINI_API_KEY = "AIzaSyCRf3hACTKWHk4RUBf_YjwqQkFfKCliQ7Y";
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
 
 exports.handler = async (event) => {
@@ -54,5 +54,3 @@ exports.handler = async (event) => {
     };
   }
 };
-
-
