@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 독서 친구 부키</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+        body {
+            font-family: 'Jua', sans-serif;
+        }
+        .chat-bubble-user {
+            background-color: #FFF3B0; /* 밝은 노란색 */
+            color: #333;
+        }
+        .chat-bubble-ai {
+            background-color: #D6EAF8; /* 밝은 파란색 */
+            color: #333;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+        #chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        #chat-messages::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        #chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="bg-[#F0F4F8]">
+
+    <div id="app-container" class="max-w-2xl mx-auto h-screen flex flex-col p-4">
+        
+        <!-- 로딩 스피너 -->
+        <div id="app-loader" class="flex flex-col items-center justify-center text-center h-full">
+            <svg class="animate-spin -ml-1 mr-3 h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="mt-4 text-gray-600">준비 중...</p>
+        </div>
+
+
+        <!-- 화면 1: 로그인 / 회원가입 화면 -->
+        <div id="auth-screen" class="hidden flex flex-col items-center justify-center text-center h-full fade-in">
+             <div class="mb-6">
+                <svg width="120" height="120" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0, -5)"><path d="M50 20 C25 20, 20 40, 20 55 C20 80, 30 95, 50 95 C70 95, 80 80, 80 55 C80 40, 75 20, 50 20 Z" fill="#A0522D"/><circle cx="50" cy="55" r="30" fill="#F5DEB3"/><circle cx="38" cy="50" r="10" fill="white"/><circle cx="38" cy="50" r="5" fill="black"/><circle cx="62" cy="50" r="10" fill="white"/><circle cx="62" cy="50" r="5" fill="black"/><path d="M45 65 Q50 75, 55 65" stroke="#E57373" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M30 30 Q40 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M70 30 Q60 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M35 85 L25 95" stroke="#D2691E" stroke-width="3" fill="none"/><path d="M65 85 L75 95" stroke="#D2691E" stroke-width="3" fill="none"/></g></svg>
+            </div>
+            <div id="login-container">
+                <h1 class="text-4xl font-bold text-[#4A4A4A] mb-2">부키와 책 이야기 시작하기!</h1>
+                <p class="text-xl text-gray-600 mb-8">Google 계정으로 간편하게 시작해봐!</p>
+                <button id="google-signin-btn" class="w-full max-w-sm bg-white hover:bg-gray-100 text-gray-700 font-semibold py-3 px-4 border border-gray-300 rounded-lg shadow-sm flex items-center justify-center transition">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-6 h-6 mr-3">
+                    Google 계정으로 로그인
+                </button>
+            </div>
+             <div id="signup-container" class="hidden w-full">
+                <h1 class="text-3xl font-bold text-[#4A4A4A] mb-2">거의 다 됐어!</h1>
+                <p class="text-lg text-gray-600 mb-6">부키가 너를 더 잘 알 수 있게 닉네임과 학년을 알려줘.</p>
+                <form id="signup-form" class="w-full max-w-sm mx-auto space-y-4">
+                    <input id="nickname-input" type="text" placeholder="닉네임 (예: 책사랑)" class="w-full p-4 text-lg border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                    <select id="grade-select" class="w-full p-4 text-lg border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                        <option value="" disabled selected>학년을 선택해줘</option>
+                        <option value="1">1학년</option>
+                        <option value="4">4학년</option>
+                        <option value="5">5학년</option>
+                    </select>
+                    <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white text-xl font-bold py-4 px-6 rounded-xl shadow-md transition transform hover:scale-105">시작하기</button>
+                </form>
+             </div>
+        </div>
+
+        <!-- 화면 2: 채팅 -->
+        <div id="chat-screen" class="hidden flex-1 flex flex-col bg-white rounded-2xl shadow-xl overflow-hidden">
+            <header class="bg-gray-100 p-4 border-b flex items-center justify-between">
+                <div class="flex items-center">
+                     <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="mr-3"><g transform="translate(0, -5)"><path d="M50 20 C25 20, 20 40, 20 55 C20 80, 30 95, 50 95 C70 95, 80 80, 80 55 C80 40, 75 20, 50 20 Z" fill="#A0522D"/><circle cx="50" cy="55" r="30" fill="#F5DEB3"/><circle cx="38" cy="50" r="10" fill="white"/><circle cx="38" cy="50" r="5" fill="black"/><circle cx="62" cy="50" r="10" fill="white"/><circle cx="62" cy="50" r="5" fill="black"/><path d="M45 65 Q50 75, 55 65" stroke="#E57373" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M30 30 Q40 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M70 30 Q60 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M35 85 L25 95" stroke="#D2691E" stroke-width="3" fill="none"/><path d="M65 85 L75 95" stroke="#D2691E" stroke-width="3" fill="none"/></g></svg>
+                    <h2 id="chat-header" class="text-xl font-bold text-gray-700">부키와 함께 책 이야기</h2>
+                </div>
+                <div class="flex items-center space-x-4">
+                     <button id="new-book-btn" class="text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-3 rounded-lg transition">
+                        <i class="fas fa-plus-circle mr-1"></i> 새로운 책 이야기
+                    </button>
+                    <button id="logout-btn" class="text-sm bg-red-100 hover:bg-red-200 text-red-700 font-semibold py-2 px-3 rounded-lg transition">
+                        <i class="fas fa-sign-out-alt mr-1"></i> 대화 종료 및 로그아웃
+                    </button>
+                </div>
+            </header>
+            <main id="chat-messages" class="flex-1 p-6 overflow-y-auto space-y-4"></main>
+            <div id="loading-indicator" class="hidden p-6 flex items-center space-x-2">
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
+                <span class="text-sm text-gray-500">부키가 생각 중...</span>
+            </div>
+            <footer class="p-4 border-t bg-gray-50">
+                <form id="chat-form" class="flex items-center space-x-3">
+                    <input id="chat-input" type="text" placeholder="여기에 너의 생각을 입력해봐!" class="flex-1 p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400" autocomplete="off">
+                    <button id="send-btn" type="submit" class="bg-blue-500 hover:bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl transition transform hover:scale-110"><i class="fas fa-paper-plane"></i></button>
+                </form>
+            </footer>
+        </div>
+
+        <!-- 화면 3: 만족도 평가 -->
+        <div id="feedback-screen" class="hidden flex flex-col items-center justify-center text-center h-full fade-in">
+            <h2 class="text-3xl font-bold text-gray-700 mb-6">오늘 대화는 어땠어?</h2>
+            <div class="flex space-x-8">
+                <button data-feedback="good" class="feedback-btn text-6xl transform transition hover:scale-125">😃</button>
+                <button data-feedback="neutral" class="feedback-btn text-6xl transform transition hover:scale-125">😐</button>
+                <button data-feedback="bad" class="feedback-btn text-6xl transform transition hover:scale-125">😞</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithRedirect } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, query, doc, getDoc, setDoc, deleteDoc, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // UI 요소
+        const appLoader = document.getElementById('app-loader');
+        const authScreen = document.getElementById('auth-screen');
+        const chatScreen = document.getElementById('chat-screen');
+        const feedbackScreen = document.getElementById('feedback-screen');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const logoutBtn = document.getElementById('logout-btn');
+        const newBookBtn = document.getElementById('new-book-btn');
+        const sendBtn = document.getElementById('send-btn');
+        const signupForm = document.getElementById('signup-form');
+        const nicknameInput = document.getElementById('nickname-input');
+        const gradeSelect = document.getElementById('grade-select');
+        const chatHeader = document.getElementById('chat-header');
+        const googleSigninBtn = document.getElementById('google-signin-btn');
+        const loginContainer = document.getElementById('login-container');
+        const signupContainer = document.getElementById('signup-container');
+
+        // 전역 상태 변수
+        let currentUser = null;
+        let userProfile = null;
+        let currentSystemPrompt = "";
+        let chatHistory = [];
+        let unsubscribe = null;
+        let conversationState = 'awaiting_title';
+        let currentBookTitle = null; 
+        let currentTopicTurn = 0; 
+
+        // 활동 시간 측정 관련 변수
+        let sessionStartTime = null; 
+        let lastActivityTime = null;
+        let totalActiveSeconds = 0;
+        const INACTIVITY_TIMEOUT = 3 * 60 * 1000;
+
+        // 연구 지표 수집용 변수
+        let lastAiMessageTime = null;
+        let userResponseTimes = [];
+        
+        const systemPrompts = {
+            '1': `너는 '부키'라는 이름의, 책을 엄청 좋아하는 초등학교 1학년 친구야.
+- 무조건 반말로, 아주 아주 친하고 신나는 말투로 대화해.
+- 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
+- 친구가 책 이야기를 해주면 "우와!😆", "진짜?😮", "대박!🤩" 같은 짧은 반응으로 시작해.
+- 대화 내용에 어울리는 이모지(🥰, 🤔, 🎉)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
+- 절대로 '왜냐하면', '따라서' 같은 어려운 말이나 선생님 같은 말투를 쓰면 안 돼.`,
+
+            '4': `너는 '부키'라는 이름의, 책에 대해 궁금한 게 많은 초등학교 4학년 친구야.
+- 항상 반말로, 똑똑하면서도 장난기 있는 말투로 대화해줘.
+- 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
+- 친구의 이야기에 "오, 신기하다!😮", "그건 생각 못했네!🤔" 처럼 감탄하며 반응해줘.
+- 대화 내용에 어울리는 이모지(😉, 👍, 🤔)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
+- 절대로 가르치려 들면 안 돼. "나는 이렇게 생각하는데, 너는 어때?" 처럼 순수하게 궁금해하는 친구처럼 말해줘.`,
+
+            '5': `너는 '부키'라는 이름의, 책을 깊이 있게 읽는 걸 좋아하는 초등학교 5학년 단짝 친구야.
+- 항상 반말로, 다정하면서도 진지하게 토론하는 걸 좋아하는 친구처럼 대화해줘.
+- 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
+- 친구의 의견에 "오, 일리 있다!👍", "네 생각도 되게 흥미롭다!😀" 라고 칭찬하며 대화를 시작해줘.
+- 대화 내용에 어울리는 이모지(🧐, ✨, 🙌)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
+- 절대 정답을 말해주지 말고, "같이 한번 생각해보자!"는 느낌으로 대화를 이끌어줘. 선생님처럼 보이면 절대 안 돼.`
+        };
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyA9nouZJfWhNokX3OUF_qjnq5wMJRWVEgQ",
+            authDomain: "booky-chat-app-01.firebaseapp.com",
+            projectId: "booky-chat-app-01",
+            storageBucket: "booky-chat-app-01.firebasestorage.app",
+            messagingSenderId: "571083167086",
+            appId: "1:571083167086:web:ca1b21400e2600764cdd7f",
+            measurementId: "G-2R6LETEFSH"
+        };
+
+        const appId = firebaseConfig.appId;
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- 인증 및 사용자 프로필 처리 ---
+        onAuthStateChanged(auth, async (user) => {
+            appLoader.classList.add('hidden');
+            if (user) {
+                currentUser = user;
+                const userProfileRef = doc(db, `artifacts/${appId}/users`, currentUser.uid);
+                const userProfileSnap = await getDoc(userProfileRef);
+
+                if (userProfileSnap.exists() && userProfileSnap.data().nickname) {
+                    userProfile = userProfileSnap.data();
+                    authScreen.classList.add('hidden');
+                    startChat();
+                } else {
+                    authScreen.classList.remove('hidden');
+                    loginContainer.classList.add('hidden');
+                    signupContainer.classList.remove('hidden');
+                    nicknameInput.value = currentUser.displayName || '';
+                }
+            } else {
+                currentUser = null;
+                userProfile = null;
+                authScreen.classList.remove('hidden');
+                loginContainer.classList.remove('hidden');
+                signupContainer.classList.add('hidden');
+                chatScreen.classList.add('hidden');
+            }
+        });
+        
+        googleSigninBtn.addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                await signInWithRedirect(auth, provider);
+            } catch (error) {
+                console.error("Google 로그인 실패:", error);
+                alert("Google 로그인에 실패했습니다. 다시 시도해 주세요.");
+            }
+        });
+
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const nickname = nicknameInput.value.trim();
+            const grade = gradeSelect.value;
+            if (!nickname || !grade) return alert("닉네임과 학년을 모두 선택해주세요!");
+            
+            userProfile = { 
+                nickname, 
+                grade, 
+                email: currentUser.email,
+                createdAt: serverTimestamp() 
+            };
+            try {
+                const userProfileRef = doc(db, `artifacts/${appId}/users`, currentUser.uid);
+                await setDoc(userProfileRef, userProfile);
+            } catch (error) { 
+                console.error("프로필 생성 실패:", error);
+                alert("프로필 생성에 실패했습니다. 다시 시도해 주세요.");
+            }
+        });
+        
+        // --- 활동 시간 측정 로직 ---
+        function recordActivity() {
+            if (!sessionStartTime) return;
+            const now = Date.now();
+            if (lastActivityTime) {
+                 const idleDuration = now - lastActivityTime;
+                if (idleDuration < INACTIVITY_TIMEOUT) {
+                    totalActiveSeconds += (idleDuration / 1000);
+                }
+            }
+            lastActivityTime = now;
+        }
+
+        function resetActivityTracker() {
+            ['mousemove', 'keydown', 'click', 'scroll'].forEach(event => window.removeEventListener(event, recordActivity));
+            ['mousemove', 'keydown', 'click', 'scroll'].forEach(event => window.addEventListener(event, recordActivity));
+            lastActivityTime = Date.now();
+            totalActiveSeconds = 0;
+        }
+
+        // --- UI 및 채팅 로직 ---
+        function addMessageToUI(sender, text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('fade-in', 'max-w-md', 'md:max-w-lg', 'p-3', 'rounded-xl', 'break-words');
+            if (sender === 'user') {
+                messageDiv.classList.add('chat-bubble-user', 'self-end', 'ml-auto');
+                messageDiv.textContent = text;
+            } else {
+                messageDiv.classList.add('chat-bubble-ai', 'self-start', 'mr-auto');
+                messageDiv.innerHTML = `<span class="font-bold">부키:</span> ${text}`;
+                lastAiMessageTime = new Date();
+            }
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        async function saveMessageToDb(role, text) {
+            if (!currentUser) return;
+            try {
+                const chatCollectionRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/chats`);
+                await addDoc(chatCollectionRef, { role, text, createdAt: serverTimestamp() });
+            } catch (error) { console.error("메시지 저장 실패:", error); }
+        }
+
+        async function getLastBookTitle() {
+            if (!currentUser) return null;
+            try {
+                const sessionsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions`);
+                const q = query(sessionsRef, orderBy("startTime", "desc"), limit(1));
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    return querySnapshot.docs[0].data().bookTitle;
+                }
+                return null;
+            } catch (error) {
+                console.error("이전 책 제목 가져오기 실패:", error);
+                return null;
+            }
+        }
+
+
+        async function startChat(isNewBook = false) {
+            if (!userProfile) return;
+            
+            if (isNewBook && sessionStartTime) {
+                await saveSessionData();
+            }
+
+            currentSystemPrompt = systemPrompts[userProfile.grade];
+            if (unsubscribe) unsubscribe();
+
+            chatHistory = [];
+            lastAiMessageTime = null;
+            userResponseTimes = [];
+            chatMessages.innerHTML = '';
+            conversationState = 'awaiting_title';
+            currentBookTitle = null;
+            currentTopicTurn = 0; 
+            
+            sessionStartTime = new Date();
+            resetActivityTracker();
+
+            if (isNewBook) {
+                 const chatCollectionRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/chats`);
+                 const q = query(chatCollectionRef);
+                 const querySnapshot = await getDocs(q);
+                 querySnapshot.forEach(async (doc) => await deleteDoc(doc.ref));
+            }
+            
+            const chatCollectionRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/chats`);
+            const q = query(chatCollectionRef, orderBy("createdAt"));
+            
+            let isInitialLoad = true; 
+
+            unsubscribe = onSnapshot(q, async (snapshot) => {
+                snapshot.docChanges().forEach(change => {
+                    if (change.type === "added") {
+                        const data = change.doc.data();
+                        if (!chatHistory.some(msg => msg.parts[0].text === data.text && msg.role === data.role)) {
+                            chatHistory.push({ role: data.role, parts: [{ text: data.text }] });
+                        }
+                        addMessageToUI(data.role === 'user' ? 'user' : 'ai', data.text);
+                    }
+                });
+
+                if (isInitialLoad && snapshot.docs.length === 0) {
+                    const lastBook = await getLastBookTitle();
+                    let initialGreeting = `안녕, ${userProfile.nickname}! 오늘 어떤 책을 읽었는지 책 제목을 알려줄래?`;
+                    if (lastBook) {
+                        initialGreeting = `안녕, ${userProfile.nickname}! 우리 지난번에 『${lastBook}』에 대해 이야기 나눠서 정말 즐거웠어. 오늘은 어떤 새로운 책을 읽었는지 알려줄래?`;
+                    }
+                    await saveMessageToDb('model', initialGreeting);
+                }
+                isInitialLoad = false;
+
+            }, (error) => console.error("Firestore onSnapshot error:", error));
+
+            chatScreen.classList.remove('hidden');
+            chatScreen.classList.add('fade-in');
+            chatHeader.textContent = `${userProfile.nickname}님, 환영합니다!`;
+        }
+        
+        async function handleSendMessage(e, textOverride = null) {
+            if (e) e.preventDefault();
+            const userInput = (textOverride || chatInput.value).trim();
+            if (!userInput) return;
+            
+            chatInput.value = '';
+            await saveMessageToDb('user', userInput);
+            
+            if (conversationState === 'awaiting_title') {
+                currentBookTitle = userInput;
+                conversationState = 'awaiting_summary';
+                const summaryRequest = "좋아! 그 책의 줄거리나 가장 기억에 남는 장면을 이야기해줄래? 😉";
+                await saveMessageToDb('model', summaryRequest);
+            } else {
+                if (lastAiMessageTime) userResponseTimes.push((new Date() - lastAiMessageTime) / 1000);
+                conversationState = 'in_progress';
+                currentTopicTurn++; 
+                await callGeminiAPI(userInput, currentTopicTurn);
+                if (currentTopicTurn >= 2) currentTopicTurn = 0; 
+            }
+        }
+
+        async function saveSessionData(feedback = null) {
+            if (!sessionStartTime || !currentUser || !userProfile) return;
+            recordActivity();
+            if (totalActiveSeconds < 1) { sessionStartTime = null; return; }
+
+            const sessionEndTime = new Date();
+            const userMessages = chatHistory.filter(m => m.role === 'user');
+            const totalMessageLength = userMessages.reduce((acc, msg) => acc + msg.parts[0].text.length, 0);
+            const avgMessageLength = userMessages.length > 0 ? Math.round(totalMessageLength / userMessages.length) : 0;
+            const questionCount = userMessages.filter(msg => msg.parts[0].text.includes('?')).length;
+            const avgResponseTime = userResponseTimes.length > 0 ? Math.round(userResponseTimes.reduce((a, b) => a + b, 0) / userResponseTimes.length) : null;
+
+            try {
+                const sessionCollectionRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions`);
+                const sessionData = {
+                    bookTitle: currentBookTitle, 
+                    nickname: userProfile.nickname,
+                    grade: userProfile.grade,
+                    startTime: sessionStartTime,
+                    endTime: sessionEndTime,
+                    activeDurationInSeconds: Math.round(totalActiveSeconds),
+                    chatTurnCount: userMessages.length,
+                    avgMessageLength,
+                    questionCount,
+                    avgResponseTime
+                };
+                if (feedback) sessionData.feedback = feedback;
+                await addDoc(sessionCollectionRef, sessionData);
+            } catch (error) { console.error("세션 데이터 저장 실패:", error); } 
+            finally { sessionStartTime = null; }
+        }
+        
+        async function callGeminiAPI(userInput, topicTurn) {
+            loadingIndicator.classList.remove('hidden');
+            chatInput.disabled = true;
+            sendBtn.disabled = true;
+            
+            let finalSystemPrompt = currentSystemPrompt;
+            if (topicTurn >= 2) {
+                finalSystemPrompt += "\n\n[중요 규칙] 이미 같은 주제에 대해 두 번 질문했습니다. 이제 대화의 흐름을 바꾸어 책의 '다른 장면', '다른 등장인물', 또는 '새로운 교훈'에 대한 질문을 해주세요. 같은 주제를 계속 파고들면 안 됩니다.";
+            }
+
+            const payload = {
+                chatHistory: chatHistory,
+                userInput: userInput,
+                systemPrompt: finalSystemPrompt
+            };
+
+            try {
+                const response = await fetch('/.netlify/functions/call-gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error(`서버 요청 실패: ${response.status}`);
+                const result = await response.json();
+                const aiResponse = result.aiResponse || "미안, 지금은 대답하기 어려워. 다시 시도해줄래? 😥";
+                await saveMessageToDb('model', aiResponse);
+            } catch (error) {
+                console.error("API 오류:", error);
+                await saveMessageToDb('model', "앗, 네트워크에 문제가 생겼나 봐. 잠시 후 다시 시도해 줘. 😥");
+            } finally {
+                loadingIndicator.classList.add('hidden');
+                chatInput.disabled = false;
+                sendBtn.disabled = false;
+                chatInput.focus();
+            }
+        }
+        
+        chatForm.addEventListener('submit', handleSendMessage);
+        newBookBtn.addEventListener('click', () => startChat(true));
+        logoutBtn.addEventListener('click', () => { chatScreen.classList.add('hidden'); feedbackScreen.classList.remove('hidden'); feedbackScreen.classList.add('fade-in'); });
+        document.querySelectorAll('.feedback-btn').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const feedback = e.target.dataset.feedback;
+                await saveSessionData(feedback);
+                if (unsubscribe) unsubscribe();
+                await signOut(auth);
+            });
+        });
+        window.addEventListener('beforeunload', () => { if (sessionStartTime) saveSessionData(); });
+    </script>
+</body>
+</html>
+
