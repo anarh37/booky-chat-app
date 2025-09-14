@@ -209,8 +209,10 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- 인증 및 사용자 프로필 처리 ---
-        onAuthStateChanged(auth, async (user) => {
+        // --- [수정] 인증 및 라우팅 로직 ---
+
+        // 사용자의 상태를 확인하고 올바른 화면을 보여주는 '교통정리' 함수
+        async function handleUserSession(user) {
             appLoader.classList.add('hidden');
             if (user) {
                 currentUser = user;
@@ -218,33 +220,39 @@
                 const userProfileSnap = await getDoc(userProfileRef);
 
                 if (userProfileSnap.exists() && userProfileSnap.data().nickname) {
+                    // 프로필이 있는 기존 사용자
                     userProfile = userProfileSnap.data();
                     authScreen.classList.add('hidden');
-                    startChat();
+                    chatScreen.classList.remove('hidden');
+                    startChat(); // 채팅 시작
                 } else {
+                    // 프로필이 없는 신규 사용자
                     authScreen.classList.remove('hidden');
+                    chatScreen.classList.add('hidden');
                     loginContainer.classList.add('hidden');
                     signupContainer.classList.remove('hidden');
                     nicknameInput.value = currentUser.displayName || '';
                 }
             } else {
+                // 로그인하지 않은 사용자
                 currentUser = null;
                 userProfile = null;
                 authScreen.classList.remove('hidden');
+                chatScreen.classList.add('hidden');
                 loginContainer.classList.remove('hidden');
                 signupContainer.classList.add('hidden');
-                chatScreen.classList.add('hidden');
             }
-        });
+        }
+
+        // 앱이 시작될 때 사용자의 로그인 상태를 감시
+        onAuthStateChanged(auth, handleUserSession);
         
-        googleSigninBtn.addEventListener('click', async () => {
+        googleSigninBtn.addEventListener('click', () => {
             const provider = new GoogleAuthProvider();
-            try {
-                await signInWithRedirect(auth, provider);
-            } catch (error) {
+            signInWithRedirect(auth, provider).catch(error => {
                 console.error("Google 로그인 실패:", error);
                 alert("Google 로그인에 실패했습니다. 다시 시도해 주세요.");
-            }
+            });
         });
 
         signupForm.addEventListener('submit', async (e) => {
@@ -265,8 +273,8 @@
                 const userProfileRef = doc(db, `artifacts/${appId}/users`, currentUser.uid);
                 await setDoc(userProfileRef, tempProfile);
                 
-                // [수정] 프로필 생성 후, 페이지를 새로고침하여 상태를 확실하게 갱신합니다.
-                window.location.reload();
+                // 프로필 저장 후, '교통정리' 함수를 다시 호출하여 상태를 재확인
+                await handleUserSession(currentUser);
 
             } catch (error) { 
                 console.error("프로필 생성 실패:", error);
@@ -391,8 +399,6 @@
 
             }, (error) => console.error("Firestore onSnapshot error:", error));
 
-            chatScreen.classList.remove('hidden');
-            chatScreen.classList.add('fade-in');
             chatHeader.textContent = `${userProfile.nickname}님, 환영합니다!`;
         }
         
@@ -460,30 +466,20 @@
                 finalSystemPrompt += "\n\n[중요 규칙] 이미 같은 주제에 대해 두 번 질문했습니다. 이제 대화의 흐름을 바꾸어 책의 '다른 장면', '다른 등장인물', 또는 '새로운 교훈'에 대한 질문을 해주세요. 같은 주제를 계속 파고들면 안 됩니다.";
             }
 
-            const apiKey = ""; 
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-            const payloadContents = [...chatHistory, { role: 'user', parts: [{ text: userInput }] }];
-
             const payload = {
-                contents: payloadContents,
-                systemInstruction: { parts: [{ text: finalSystemPrompt }] },
-                safetySettings: [
-                    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-                    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-                    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-                    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-                ],
+                chatHistory,
+                userInput,
+                systemPrompt: finalSystemPrompt
             };
 
             try {
-                const response = await fetch(apiUrl, {
+                const response = await fetch('/.netlify/functions/call-gemini', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 if (!response.ok) throw new Error(`API 요청 실패: ${response.status}`);
                 const result = await response.json();
-                const aiResponse = result.candidates?.[0]?.content?.parts?.[0]?.text || "미안, 지금은 대답하기 어려워. 다시 시도해줄래? 😥";
+                const aiResponse = result.aiResponse || "미안, 지금은 대답하기 어려워. 다시 시도해줄래? 😥";
                 await saveMessageToDb('model', aiResponse);
             } catch (error) {
                 console.error("Gemini API 오류:", error);
