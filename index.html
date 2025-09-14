@@ -255,7 +255,8 @@
             const grade = gradeSelect.value;
             if (!nickname || !grade) return alert("닉네임과 학년을 모두 선택해주세요!");
             
-            userProfile = { // [수정] 전역 변수를 먼저 업데이트합니다.
+            // [수정] userProfile을 임시 객체로 생성합니다.
+            const newProfile = { 
                 nickname, 
                 grade, 
                 email: currentUser.email,
@@ -263,9 +264,10 @@
             };
             try {
                 const userProfileRef = doc(db, `artifacts/${appId}/users`, currentUser.uid);
-                await setDoc(userProfileRef, userProfile);
+                await setDoc(userProfileRef, newProfile);
                 
-                // [수정] 프로필 저장 후, 화면을 직접 전환하고 채팅을 시작합니다.
+                // [수정] 프로필 저장 후, 전역 변수를 업데이트하고 화면을 직접 전환합니다.
+                userProfile = newProfile; 
                 authScreen.classList.add('hidden');
                 chatScreen.classList.remove('hidden');
                 startChat();
@@ -501,4 +503,6 @@
     </script>
 </body>
 </html>
+
+
 
