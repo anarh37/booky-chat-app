@@ -165,7 +165,7 @@
         let sessionStartTime = null; 
         let lastActivityTime = null;
         let totalActiveSeconds = 0;
-        const INACTIVITY_TIMEOUT = 3 * 60 * 1000;
+        const INACTIVITY_TIMEOUT = 3 * 60 * 1000; // 3분
 
         // 연구 지표 수집용 변수
         let lastAiMessageTime = null;
@@ -255,7 +255,7 @@
             const grade = gradeSelect.value;
             if (!nickname || !grade) return alert("닉네임과 학년을 모두 선택해주세요!");
             
-            userProfile = { 
+            const tempProfile = { 
                 nickname, 
                 grade, 
                 email: currentUser.email,
@@ -263,7 +263,13 @@
             };
             try {
                 const userProfileRef = doc(db, `artifacts/${appId}/users`, currentUser.uid);
-                await setDoc(userProfileRef, userProfile);
+                await setDoc(userProfileRef, tempProfile);
+                
+                // [수정] 프로필 저장 후, 전역 변수를 업데이트하고 채팅을 즉시 시작합니다.
+                userProfile = tempProfile; 
+                authScreen.classList.add('hidden');
+                startChat();
+
             } catch (error) { 
                 console.error("프로필 생성 실패:", error);
                 alert("프로필 생성에 실패했습니다. 다시 시도해 주세요.");
@@ -456,25 +462,33 @@
                 finalSystemPrompt += "\n\n[중요 규칙] 이미 같은 주제에 대해 두 번 질문했습니다. 이제 대화의 흐름을 바꾸어 책의 '다른 장면', '다른 등장인물', 또는 '새로운 교훈'에 대한 질문을 해주세요. 같은 주제를 계속 파고들면 안 됩니다.";
             }
 
+            const apiKey = ""; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            const payloadContents = [...chatHistory, { role: 'user', parts: [{ text: userInput }] }];
+
             const payload = {
-                chatHistory: chatHistory,
-                userInput: userInput,
-                systemPrompt: finalSystemPrompt
+                contents: payloadContents,
+                systemInstruction: { parts: [{ text: finalSystemPrompt }] },
+                safetySettings: [
+                    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+                    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+                    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+                    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+                ],
             };
 
             try {
-                const response = await fetch('/.netlify/functions/call-gemini', {
+                const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-
-                if (!response.ok) throw new Error(`서버 요청 실패: ${response.status}`);
+                if (!response.ok) throw new Error(`API 요청 실패: ${response.status}`);
                 const result = await response.json();
-                const aiResponse = result.aiResponse || "미안, 지금은 대답하기 어려워. 다시 시도해줄래? 😥";
+                const aiResponse = result.candidates?.[0]?.content?.parts?.[0]?.text || "미안, 지금은 대답하기 어려워. 다시 시도해줄래? 😥";
                 await saveMessageToDb('model', aiResponse);
             } catch (error) {
-                console.error("API 오류:", error);
+                console.error("Gemini API 오류:", error);
                 await saveMessageToDb('model', "앗, 네트워크에 문제가 생겼나 봐. 잠시 후 다시 시도해 줘. 😥");
             } finally {
                 loadingIndicator.classList.add('hidden');
