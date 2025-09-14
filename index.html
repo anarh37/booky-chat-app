@@ -265,10 +265,8 @@
                 const userProfileRef = doc(db, `artifacts/${appId}/users`, currentUser.uid);
                 await setDoc(userProfileRef, tempProfile);
                 
-                // [수정] 프로필 저장 후, 전역 변수를 업데이트하고 채팅을 즉시 시작합니다.
-                userProfile = tempProfile; 
-                authScreen.classList.add('hidden');
-                startChat();
+                // [수정] 프로필 생성 후, 페이지를 새로고침하여 상태를 확실하게 갱신합니다.
+                window.location.reload();
 
             } catch (error) { 
                 console.error("프로필 생성 실패:", error);
@@ -513,4 +511,5 @@
     </script>
 </body>
 </html>
+
 
