@@ -45,6 +45,7 @@
 
     <div id="app-container" class="max-w-2xl mx-auto h-screen flex flex-col p-4">
         
+        <!-- 로딩 스피너 -->
         <div id="app-loader" class="flex flex-col items-center justify-center text-center h-full">
             <svg class="animate-spin -ml-1 mr-3 h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -54,34 +55,36 @@
         </div>
 
 
+        <!-- 화면 1: 로그인 / 회원가입 화면 -->
         <div id="auth-screen" class="hidden flex flex-col items-center justify-center text-center h-full fade-in">
              <div class="mb-6">
-                 <svg width="120" height="120" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0, -5)"><path d="M50 20 C25 20, 20 40, 20 55 C20 80, 30 95, 50 95 C70 95, 80 80, 80 55 C80 40, 75 20, 50 20 Z" fill="#A0522D"/><circle cx="50" cy="55" r="30" fill="#F5DEB3"/><circle cx="38" cy="50" r="10" fill="white"/><circle cx="38" cy="50" r="5" fill="black"/><circle cx="62" cy="50" r="10" fill="white"/><circle cx="62" cy="50" r="5" fill="black"/><path d="M45 65 Q50 75, 55 65" stroke="#E57373" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M30 30 Q40 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M70 30 Q60 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M35 85 L25 95" stroke="#D2691E" stroke-width="3" fill="none"/><path d="M65 85 L75 95" stroke="#D2691E" stroke-width="3" fill="none"/></g></svg>
+                <svg width="120" height="120" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0, -5)"><path d="M50 20 C25 20, 20 40, 20 55 C20 80, 30 95, 50 95 C70 95, 80 80, 80 55 C80 40, 75 20, 50 20 Z" fill="#A0522D"/><circle cx="50" cy="55" r="30" fill="#F5DEB3"/><circle cx="38" cy="50" r="10" fill="white"/><circle cx="38" cy="50" r="5" fill="black"/><circle cx="62" cy="50" r="10" fill="white"/><circle cx="62" cy="50" r="5" fill="black"/><path d="M45 65 Q50 75, 55 65" stroke="#E57373" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M30 30 Q40 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M70 30 Q60 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M35 85 L25 95" stroke="#D2691E" stroke-width="3" fill="none"/><path d="M65 85 L75 95" stroke="#D2691E" stroke-width="3" fill="none"/></g></svg>
+            </div>
+            <div id="login-container">
+                <h1 class="text-4xl font-bold text-[#4A4A4A] mb-2">부키와 책 이야기 시작하기!</h1>
+                <p class="text-xl text-gray-600 mb-8">Google 계정으로 간편하게 시작해봐!</p>
+                <button id="google-signin-btn" class="w-full max-w-sm bg-white hover:bg-gray-100 text-gray-700 font-semibold py-3 px-4 border border-gray-300 rounded-lg shadow-sm flex items-center justify-center transition">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-6 h-6 mr-3">
+                    Google 계정으로 로그인
+                </button>
+            </div>
+             <div id="signup-container" class="hidden w-full">
+                <h1 class="text-3xl font-bold text-[#4A4A4A] mb-2">거의 다 됐어!</h1>
+                <p class="text-lg text-gray-600 mb-6">부키가 너를 더 잘 알 수 있게 닉네임과 학년을 알려줘.</p>
+                <form id="signup-form" class="w-full max-w-sm mx-auto space-y-4">
+                    <input id="nickname-input" type="text" placeholder="닉네임 (예: 책사랑)" class="w-full p-4 text-lg border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                    <select id="grade-select" class="w-full p-4 text-lg border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                        <option value="" disabled selected>학년을 선택해줘</option>
+                        <option value="1">1학년</option>
+                        <option value="4">4학년</option>
+                        <option value="5">5학년</option>
+                    </select>
+                    <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white text-xl font-bold py-4 px-6 rounded-xl shadow-md transition transform hover:scale-105">시작하기</button>
+                </form>
              </div>
-             <div id="login-container">
-                 <h1 class="text-4xl font-bold text-[#4A4A4A] mb-2">부키와 책 이야기 시작하기!</h1>
-                 <p class="text-xl text-gray-600 mb-8">Google 계정으로 간편하게 시작해봐!</p>
-                 <button id="google-signin-btn" class="w-full max-w-sm bg-white hover:bg-gray-100 text-gray-700 font-semibold py-3 px-4 border border-gray-300 rounded-lg shadow-sm flex items-center justify-center transition">
-                     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-6 h-6 mr-3">
-                     Google 계정으로 로그인
-                 </button>
-             </div>
-              <div id="signup-container" class="hidden w-full">
-                 <h1 class="text-3xl font-bold text-[#4A4A4A] mb-2">거의 다 됐어!</h1>
-                 <p class="text-lg text-gray-600 mb-6">부키가 너를 더 잘 알 수 있게 닉네임과 학년을 알려줘.</p>
-                 <form id="signup-form" class="w-full max-w-sm mx-auto space-y-4">
-                     <input id="nickname-input" type="text" placeholder="닉네임 (예: 책사랑)" class="w-full p-4 text-lg border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                     <select id="grade-select" class="w-full p-4 text-lg border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                         <option value="" disabled selected>학년을 선택해줘</option>
-                         <option value="1">1학년</option>
-                         <option value="4">4학년</option>
-                         <option value="5">5학년</option>
-                     </select>
-                     <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white text-xl font-bold py-4 px-6 rounded-xl shadow-md transition transform hover:scale-105">시작하기</button>
-                 </form>
-              </div>
         </div>
 
+        <!-- 화면 2: 채팅 -->
         <div id="chat-screen" class="hidden flex-1 flex flex-col bg-white rounded-2xl shadow-xl overflow-hidden">
             <header class="bg-gray-100 p-4 border-b flex items-center justify-between">
                 <div class="flex items-center">
@@ -90,11 +93,11 @@
                 </div>
                 <div class="flex items-center space-x-4">
                      <button id="new-book-btn" class="text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-3 rounded-lg transition">
-                         <i class="fas fa-plus-circle mr-1"></i> 새로운 책 이야기
-                     </button>
-                     <button id="logout-btn" class="text-sm bg-red-100 hover:bg-red-200 text-red-700 font-semibold py-2 px-3 rounded-lg transition">
-                         <i class="fas fa-sign-out-alt mr-1"></i> 대화 종료 및 로그아웃
-                     </button>
+                        <i class="fas fa-plus-circle mr-1"></i> 새로운 책 이야기
+                    </button>
+                    <button id="logout-btn" class="text-sm bg-red-100 hover:bg-red-200 text-red-700 font-semibold py-2 px-3 rounded-lg transition">
+                        <i class="fas fa-sign-out-alt mr-1"></i> 대화 종료 및 로그아웃
+                    </button>
                 </div>
             </header>
             <main id="chat-messages" class="flex-1 p-6 overflow-y-auto space-y-4"></main>
@@ -112,6 +115,7 @@
             </footer>
         </div>
 
+        <!-- 화면 3: 만족도 평가 -->
         <div id="feedback-screen" class="hidden flex flex-col items-center justify-center text-center h-full fade-in">
             <h2 class="text-3xl font-bold text-gray-700 mb-6">오늘 대화는 어땠어?</h2>
             <div class="flex space-x-8">
@@ -124,7 +128,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // [수정] signInWithPopup 임포트, getRedirectResult 제거
+        import { getAuth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, query, doc, getDoc, setDoc, deleteDoc, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // UI 요소
@@ -194,7 +199,7 @@
             apiKey: "AIzaSyA9nouZJfWhNokX3OUF_qjnq5wMJRWVEgQ",
             authDomain: "booky-chat-app-01.firebaseapp.com",
             projectId: "booky-chat-app-01",
-            storageBucket: "booky-chat-app-01.appspot.com",
+            storageBucket: "booky-chat-app-01.firebasestorage.app",
             messagingSenderId: "571083167086",
             appId: "1:571083167086:web:ca1b21400e2600764cdd7f",
             measurementId: "G-2R6LETEFSH"
@@ -206,70 +211,47 @@
         const db = getFirestore(app);
 
         // --- 인증 및 라우팅 로직 ---
-
-        // [수정된 부분 시작] 
-        // 페이지가 로드될 때 리디렉션 결과를 먼저 처리합니다.
-        // 이 함수의 주된 역할은 Firebase가 인증 상태를 파악하도록 돕는 것이며,
-        // 여기서 직접 UI를 변경하지 않습니다. UI 변경은 onAuthStateChanged가 전담합니다.
-        getRedirectResult(auth)
-            .catch((error) => {
-                // 리디렉션 중 발생할 수 있는 오류를 처리합니다.
-                console.error("Google 로그인 리디렉션 오류:", error);
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                alert(`로그인 중 오류가 발생했습니다: ${errorMessage} (${errorCode})`);
-                // 오류 발생 시 로더를 숨기고 로그인 화면을 보여줍니다.
-                appLoader.classList.add('hidden');
-                authScreen.classList.remove('hidden');
-            });
-
-        // onAuthStateChanged는 인증 상태의 유일한 '진실의 원천(source of truth)'입니다.
-        // 리디렉션 결과 처리가 완료되면 이 리스너가 최종 인증 상태를 가지고 실행됩니다.
+        
         onAuthStateChanged(auth, async (user) => {
-            // 인증 상태가 확정된 후에 로딩 스피너를 숨깁니다.
             appLoader.classList.add('hidden');
-            
             if (user) {
-                // 사용자가 로그인된 경우
                 currentUser = user;
                 const userProfileRef = doc(db, `artifacts/${appId}/users`, currentUser.uid);
                 const userProfileSnap = await getDoc(userProfileRef);
 
                 if (userProfileSnap.exists() && userProfileSnap.data().nickname) {
-                    // 프로필이 있으면 채팅 화면으로 이동
                     userProfile = userProfileSnap.data();
                     authScreen.classList.add('hidden');
-                    feedbackScreen.classList.add('hidden');
                     chatScreen.classList.remove('hidden');
                     startChat();
                 } else {
-                    // 프로필이 없으면 회원가입 화면으로 이동
                     authScreen.classList.remove('hidden');
                     chatScreen.classList.add('hidden');
-                    feedbackScreen.classList.add('hidden');
                     loginContainer.classList.add('hidden');
                     signupContainer.classList.remove('hidden');
                     nicknameInput.value = currentUser.displayName || '';
                 }
             } else {
-                // 사용자가 로그아웃된 경우
                 currentUser = null;
                 userProfile = null;
                 authScreen.classList.remove('hidden');
                 chatScreen.classList.add('hidden');
-                feedbackScreen.classList.add('hidden');
                 loginContainer.classList.remove('hidden');
                 signupContainer.classList.add('hidden');
             }
         });
-        // [수정된 부분 끝]
         
+        // [수정] signInWithPopup 방식으로 변경
         googleSigninBtn.addEventListener('click', () => {
             const provider = new GoogleAuthProvider();
-            signInWithRedirect(auth, provider).catch(error => {
-                console.error("Google 로그인 실패:", error);
-                alert("Google 로그인에 실패했습니다. 다시 시도해 주세요.");
-            });
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    // 로그인 성공 시 onAuthStateChanged가 자동으로 감지하여 처리합니다.
+                })
+                .catch((error) => {
+                    console.error("Google 로그인 실패:", error);
+                    alert("Google 로그인에 실패했습니다. 다시 시도해 주세요.");
+                });
         });
 
         signupForm.addEventListener('submit', async (e) => {
@@ -526,7 +508,6 @@
     </script>
 </body>
 </html>
-
 
 
 
