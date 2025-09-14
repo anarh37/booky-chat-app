@@ -128,7 +128,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithRedirect } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // [수정] getRedirectResult 임포트 추가
+        import { getAuth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, query, doc, getDoc, setDoc, deleteDoc, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // UI 요소
@@ -210,6 +211,23 @@
         const db = getFirestore(app);
 
         // --- 인증 및 라우팅 로직 ---
+
+        // [수정] 리디렉션 결과 처리 로직 추가
+        getRedirectResult(auth)
+            .then((result) => {
+                if (result) {
+                    // 리디렉션 후 로그인 성공 시, onAuthStateChanged가 처리하도록 둡니다.
+                    // 로딩 스피너를 보여주어 상태 변경을 기다립니다.
+                    appLoader.classList.remove('hidden');
+                    authScreen.classList.add('hidden');
+                }
+            })
+            .catch((error) => {
+                console.error("리디렉션 결과 처리 오류:", error);
+                alert("로그인 처리 중 오류가 발생했습니다.");
+            });
+
+
         onAuthStateChanged(auth, async (user) => {
             appLoader.classList.add('hidden');
             if (user) {
@@ -255,7 +273,6 @@
             const grade = gradeSelect.value;
             if (!nickname || !grade) return alert("닉네임과 학년을 모두 선택해주세요!");
             
-            // [수정] userProfile을 임시 객체로 생성합니다.
             const newProfile = { 
                 nickname, 
                 grade, 
@@ -266,7 +283,6 @@
                 const userProfileRef = doc(db, `artifacts/${appId}/users`, currentUser.uid);
                 await setDoc(userProfileRef, newProfile);
                 
-                // [수정] 프로필 저장 후, 전역 변수를 업데이트하고 화면을 직접 전환합니다.
                 userProfile = newProfile; 
                 authScreen.classList.add('hidden');
                 chatScreen.classList.remove('hidden');
@@ -503,6 +519,7 @@
     </script>
 </body>
 </html>
+
 
 
 
