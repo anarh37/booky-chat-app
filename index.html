@@ -92,9 +92,6 @@
                     <h2 id="chat-header" class="text-xl font-bold text-gray-700">부키와 함께 책 이야기</h2>
                 </div>
                 <div class="flex items-center space-x-2">
-                     <button id="export-btn" class="text-sm bg-green-100 hover:bg-green-200 text-green-700 font-semibold py-2 px-3 rounded-lg transition" style="display: none;">
-                        <i class="fas fa-file-csv mr-1"></i> 전체 데이터 다운로드
-                    </button>
                      <button id="new-book-btn" class="text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-3 rounded-lg transition">
                         <i class="fas fa-plus-circle mr-1"></i> 새로운 책 이야기
                     </button>
@@ -153,9 +150,6 @@
         const googleSigninBtn = document.getElementById('google-signin-btn');
         const loginContainer = document.getElementById('login-container');
         const signupContainer = document.getElementById('signup-container');
-        const exportBtn = document.getElementById('export-btn');
-
-        const ADMIN_UID = "NQA8Px08puQ44A5EYeCaZgyDQu13";
 
         // 전역 상태 변수
         let currentUser = null;
@@ -220,13 +214,6 @@
             appLoader.classList.add('hidden');
             if (user) {
                 currentUser = user;
-
-                if (currentUser.uid === ADMIN_UID) {
-                    exportBtn.style.display = 'inline-block';
-                } else {
-                    exportBtn.style.display = 'none';
-                }
-
                 const userProfileRef = doc(db, `artifacts/${appId}/users`, currentUser.uid);
                 const userProfileSnap = await getDoc(userProfileRef);
 
@@ -247,7 +234,7 @@
                 userProfile = null;
                 authScreen.classList.remove('hidden');
                 chatScreen.classList.add('hidden');
-                feedbackScreen.classList.add('hidden'); // [수정] 로그아웃 시 피드백 화면 숨기기
+                feedbackScreen.classList.add('hidden'); 
                 loginContainer.classList.remove('hidden');
                 signupContainer.classList.add('hidden');
             }
@@ -435,7 +422,11 @@
         async function saveSessionData(feedback = null) {
             if (!sessionStartTime || !currentUser || !userProfile) return;
             recordActivity();
-            if (totalActiveSeconds < 1) { sessionStartTime = null; return; }
+            if (totalActiveSeconds < 1) { 
+                if (feedback) await triggerSaveToSheet({}); // 피드백만이라도 저장
+                sessionStartTime = null; 
+                return; 
+            }
 
             const sessionEndTime = new Date();
             const userMessages = chatHistory.filter(m => m.role === 'user');
@@ -443,27 +434,49 @@
             const avgMessageLength = userMessages.length > 0 ? Math.round(totalMessageLength / userMessages.length) : 0;
             const questionCount = userMessages.filter(msg => msg.parts[0].text.includes('?')).length;
             const avgResponseTime = userResponseTimes.length > 0 ? Math.round(userResponseTimes.reduce((a, b) => a + b, 0) / userResponseTimes.length) : null;
-
+            
+            const sessionData = {
+                bookTitle: currentBookTitle, 
+                nickname: userProfile.nickname,
+                grade: userProfile.grade,
+                startTime: sessionStartTime,
+                endTime: sessionEndTime,
+                activeDurationInSeconds: Math.round(totalActiveSeconds),
+                chatTurnCount: userMessages.length,
+                avgMessageLength,
+                questionCount,
+                avgResponseTime
+            };
+            if (feedback) sessionData.feedback = feedback;
+            
             try {
                 const sessionCollectionRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions`);
-                const sessionData = {
-                    bookTitle: currentBookTitle, 
-                    nickname: userProfile.nickname,
-                    grade: userProfile.grade,
-                    startTime: sessionStartTime,
-                    endTime: sessionEndTime,
-                    activeDurationInSeconds: Math.round(totalActiveSeconds),
-                    chatTurnCount: userMessages.length,
-                    avgMessageLength,
-                    questionCount,
-                    avgResponseTime
-                };
-                if (feedback) sessionData.feedback = feedback;
-                await addDoc(sessionCollectionRef, sessionData);
+                const docRef = await addDoc(sessionCollectionRef, sessionData);
+                
+                // [수정] Firestore 저장 후, Netlify 함수를 호출하여 시트에 저장
+                sessionData.sessionId = docRef.id;
+                sessionData.userId = currentUser.uid;
+                await triggerSaveToSheet(sessionData);
+
             } catch (error) { console.error("세션 데이터 저장 실패:", error); } 
             finally { sessionStartTime = null; }
         }
         
+        // [추가] Netlify 함수를 호출하여 시트에 데이터를 저장하는 함수
+        async function triggerSaveToSheet(sessionData) {
+             try {
+                const response = await fetch('/.netlify/functions/save-to-sheet', {
+                    method: 'POST',
+                    body: JSON.stringify(sessionData)
+                });
+                if (!response.ok) {
+                    console.error('시트 저장 실패:', await response.text());
+                }
+            } catch (error) {
+                console.error('시트 저장 함수 호출 실패:', error);
+            }
+        }
+
         async function callGeminiAPI(userInput, topicTurn) {
             loadingIndicator.classList.remove('hidden');
             chatInput.disabled = true;
@@ -499,81 +512,14 @@
                 chatInput.focus();
             }
         }
-
-        // [수정] 전체 데이터 다운로드 기능으로 변경
-        async function exportDataToCSV() {
-            if (!currentUser || currentUser.uid !== ADMIN_UID) {
-                alert("관리자만 데이터를 다운로드할 수 있습니다.");
-                return;
-            }
-            
-            alert("전체 사용자 세션 데이터를 CSV 파일로 다운로드합니다. 데이터 양에 따라 시간이 걸릴 수 있습니다.");
-
-            try {
-                const allUsersRef = collection(db, `artifacts/${appId}/users`);
-                const usersSnapshot = await getDocs(allUsersRef);
-
-                if (usersSnapshot.empty) {
-                    alert("다운로드할 데이터가 없습니다.");
-                    return;
-                }
-
-                let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // UTF-8 BOM for Excel
-                const headers = [
-                    'UserID', 'Nickname', 'Grade', 'SessionID', 'BookTitle', 
-                    'StartTime', 'EndTime', 'Duration(sec)', 'Feedback', 
-                    'Turns', 'AvgLength', 'Questions', 'AvgResponseTime'
-                ];
-                csvContent += headers.join(",") + "\r\n";
-
-                for (const userDoc of usersSnapshot.docs) {
-                    const userData = userDoc.data();
-                    const userId = userDoc.id;
-                    const sessionsRef = collection(db, `artifacts/${appId}/users/${userId}/sessions`);
-                    const sessionsSnapshot = await getDocs(query(sessionsRef, orderBy("startTime", "desc")));
-                    
-                    sessionsSnapshot.forEach(sessionDoc => {
-                        const data = sessionDoc.data();
-                        const sessionId = sessionDoc.id;
-                        const startTime = data.startTime ? new Date(data.startTime.seconds * 1000).toLocaleString() : '';
-                        const endTime = data.endTime ? new Date(data.endTime.seconds * 1000).toLocaleString() : '';
-
-                        const row = [
-                            userId,
-                            `"${userData.nickname || ''}"`,
-                            userData.grade || '',
-                            sessionId,
-                            `"${data.bookTitle || ''}"`,
-                            startTime, endTime,
-                            data.activeDurationInSeconds || 0,
-                            data.feedback || '',
-                            data.chatTurnCount || 0,
-                            data.avgMessageLength || 0,
-                            data.questionCount || 0,
-                            data.avgResponseTime || 0
-                        ];
-                        csvContent += row.join(",") + "\r\n";
-                    });
-                }
-                
-                const encodedUri = encodeURI(csvContent);
-                const link = document.createElement("a");
-                link.setAttribute("href", encodedUri);
-                link.setAttribute("download", `booky_all_sessions_data.csv`);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-
-            } catch (error) {
-                console.error("전체 데이터 내보내기 실패:", error);
-                alert("데이터를 내보내는 중 오류가 발생했습니다.");
-            }
-        }
         
         chatForm.addEventListener('submit', handleSendMessage);
         newBookBtn.addEventListener('click', () => startChat(true));
-        logoutBtn.addEventListener('click', () => { chatScreen.classList.add('hidden'); feedbackScreen.classList.remove('hidden'); feedbackScreen.classList.add('fade-in'); });
-        exportBtn.addEventListener('click', exportDataToCSV);
+        logoutBtn.addEventListener('click', () => { 
+            chatScreen.classList.add('hidden'); 
+            feedbackScreen.classList.remove('hidden'); 
+            feedbackScreen.classList.add('fade-in');
+        });
 
         document.querySelectorAll('.feedback-btn').forEach(button => {
             button.addEventListener('click', async (e) => {
@@ -581,7 +527,6 @@
                 await saveSessionData(feedback);
                 if (unsubscribe) unsubscribe();
                 await signOut(auth);
-                // [수정] 로그아웃 후 페이지 새로고침 추가
                 window.location.reload();
             });
         });
