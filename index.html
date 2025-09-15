@@ -91,7 +91,10 @@
                      <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="mr-3"><g transform="translate(0, -5)"><path d="M50 20 C25 20, 20 40, 20 55 C20 80, 30 95, 50 95 C70 95, 80 80, 80 55 C80 40, 75 20, 50 20 Z" fill="#A0522D"/><circle cx="50" cy="55" r="30" fill="#F5DEB3"/><circle cx="38" cy="50" r="10" fill="white"/><circle cx="38" cy="50" r="5" fill="black"/><circle cx="62" cy="50" r="10" fill="white"/><circle cx="62" cy="50" r="5" fill="black"/><path d="M45 65 Q50 75, 55 65" stroke="#E57373" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M30 30 Q40 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M70 30 Q60 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M35 85 L25 95" stroke="#D2691E" stroke-width="3" fill="none"/><path d="M65 85 L75 95" stroke="#D2691E" stroke-width="3" fill="none"/></g></svg>
                     <h2 id="chat-header" class="text-xl font-bold text-gray-700">부키와 함께 책 이야기</h2>
                 </div>
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                     <button id="export-btn" class="text-sm bg-green-100 hover:bg-green-200 text-green-700 font-semibold py-2 px-3 rounded-lg transition" style="display: none;">
+                        <i class="fas fa-file-csv mr-1"></i> 전체 데이터 다운로드
+                    </button>
                      <button id="new-book-btn" class="text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-3 rounded-lg transition">
                         <i class="fas fa-plus-circle mr-1"></i> 새로운 책 이야기
                     </button>
@@ -128,7 +131,6 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        // [수정] signInWithPopup 임포트, getRedirectResult 제거
         import { getAuth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, query, doc, getDoc, setDoc, deleteDoc, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
@@ -151,6 +153,10 @@
         const googleSigninBtn = document.getElementById('google-signin-btn');
         const loginContainer = document.getElementById('login-container');
         const signupContainer = document.getElementById('signup-container');
+        const exportBtn = document.getElementById('export-btn');
+
+        // [추가] 관리자 UID 설정 (아래 설명서를 보고 꼭 수정해주세요!)
+        const ADMIN_UID = "여기에 관리자님의 UID를 붙여넣으세요";
 
         // 전역 상태 변수
         let currentUser = null;
@@ -211,11 +217,18 @@
         const db = getFirestore(app);
 
         // --- 인증 및 라우팅 로직 ---
-        
         onAuthStateChanged(auth, async (user) => {
             appLoader.classList.add('hidden');
             if (user) {
                 currentUser = user;
+
+                // [수정] 관리자 여부 확인 후 버튼 표시
+                if (currentUser.uid === ADMIN_UID) {
+                    exportBtn.style.display = 'inline-block';
+                } else {
+                    exportBtn.style.display = 'none';
+                }
+
                 const userProfileRef = doc(db, `artifacts/${appId}/users`, currentUser.uid);
                 const userProfileSnap = await getDoc(userProfileRef);
 
@@ -241,16 +254,12 @@
             }
         });
         
-        // [수정] signInWithPopup 방식으로 변경
         googleSigninBtn.addEventListener('click', () => {
             const provider = new GoogleAuthProvider();
             signInWithPopup(auth, provider)
-                .then((result) => {
-                    // 로그인 성공 시 onAuthStateChanged가 자동으로 감지하여 처리합니다.
-                })
                 .catch((error) => {
                     console.error("Google 로그인 실패:", error);
-                    alert("Google 로그인에 실패했습니다. 다시 시도해 주세요.");
+                    alert("Google 로그인에 실패했습니다. 팝업이 차단되었는지 확인해주세요.");
                 });
         });
 
@@ -276,7 +285,6 @@
                 authScreen.classList.add('hidden');
                 chatScreen.classList.remove('hidden');
                 startChat();
-
             } catch (error) { 
                 console.error("프로필 생성 실패:", error);
                 alert("프로필 생성에 실패했습니다. 다시 시도해 주세요.");
@@ -492,10 +500,82 @@
                 chatInput.focus();
             }
         }
+
+        // [수정] 전체 데이터 다운로드 기능으로 변경
+        async function exportDataToCSV() {
+            if (!currentUser || currentUser.uid !== ADMIN_UID) {
+                alert("관리자만 데이터를 다운로드할 수 있습니다.");
+                return;
+            }
+            
+            alert("전체 사용자 세션 데이터를 CSV 파일로 다운로드합니다. 데이터 양에 따라 시간이 걸릴 수 있습니다.");
+
+            try {
+                const allUsersRef = collection(db, `artifacts/${appId}/users`);
+                const usersSnapshot = await getDocs(allUsersRef);
+
+                if (usersSnapshot.empty) {
+                    alert("다운로드할 데이터가 없습니다.");
+                    return;
+                }
+
+                let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // UTF-8 BOM for Excel
+                const headers = [
+                    'UserID', 'Nickname', 'Grade', 'SessionID', 'BookTitle', 
+                    'StartTime', 'EndTime', 'Duration(sec)', 'Feedback', 
+                    'Turns', 'AvgLength', 'Questions', 'AvgResponseTime'
+                ];
+                csvContent += headers.join(",") + "\r\n";
+
+                for (const userDoc of usersSnapshot.docs) {
+                    const userData = userDoc.data();
+                    const userId = userDoc.id;
+                    const sessionsRef = collection(db, `artifacts/${appId}/users/${userId}/sessions`);
+                    const sessionsSnapshot = await getDocs(query(sessionsRef, orderBy("startTime", "desc")));
+                    
+                    sessionsSnapshot.forEach(sessionDoc => {
+                        const data = sessionDoc.data();
+                        const sessionId = sessionDoc.id;
+                        const startTime = data.startTime ? new Date(data.startTime.seconds * 1000).toLocaleString() : '';
+                        const endTime = data.endTime ? new Date(data.endTime.seconds * 1000).toLocaleString() : '';
+
+                        const row = [
+                            userId,
+                            `"${userData.nickname || ''}"`,
+                            userData.grade || '',
+                            sessionId,
+                            `"${data.bookTitle || ''}"`,
+                            startTime, endTime,
+                            data.activeDurationInSeconds || 0,
+                            data.feedback || '',
+                            data.chatTurnCount || 0,
+                            data.avgMessageLength || 0,
+                            data.questionCount || 0,
+                            data.avgResponseTime || 0
+                        ];
+                        csvContent += row.join(",") + "\r\n";
+                    });
+                }
+                
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `booky_all_sessions_data.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+            } catch (error) {
+                console.error("전체 데이터 내보내기 실패:", error);
+                alert("데이터를 내보내는 중 오류가 발생했습니다.");
+            }
+        }
         
         chatForm.addEventListener('submit', handleSendMessage);
         newBookBtn.addEventListener('click', () => startChat(true));
         logoutBtn.addEventListener('click', () => { chatScreen.classList.add('hidden'); feedbackScreen.classList.remove('hidden'); feedbackScreen.classList.add('fade-in'); });
+        exportBtn.addEventListener('click', exportDataToCSV);
+
         document.querySelectorAll('.feedback-btn').forEach(button => {
             button.addEventListener('click', async (e) => {
                 const feedback = e.target.dataset.feedback;
@@ -508,6 +588,7 @@
     </script>
 </body>
 </html>
+
 
 
 
