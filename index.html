@@ -73,11 +73,15 @@
                 <p class="text-lg text-gray-600 mb-6">부키가 너를 더 잘 알 수 있게 닉네임과 학년을 알려줘.</p>
                 <form id="signup-form" class="w-full max-w-sm mx-auto space-y-4">
                     <input id="nickname-input" type="text" placeholder="닉네임 (예: 책사랑)" class="w-full p-4 text-lg border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                    <!-- [수정] 1~6학년 선택 가능하도록 변경 -->
                     <select id="grade-select" class="w-full p-4 text-lg border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400" required>
                         <option value="" disabled selected>학년을 선택해줘</option>
                         <option value="1">1학년</option>
+                        <option value="2">2학년</option>
+                        <option value="3">3학년</option>
                         <option value="4">4학년</option>
                         <option value="5">5학년</option>
+                        <option value="6">6학년</option>
                     </select>
                     <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white text-xl font-bold py-4 px-6 rounded-xl shadow-md transition transform hover:scale-105">시작하기</button>
                 </form>
@@ -89,7 +93,8 @@
             <header class="bg-gray-100 p-3 sm:p-4 border-b flex items-center justify-between flex-wrap">
                 <div class="flex items-center">
                      <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="mr-3"><g transform="translate(0, -5)"><path d="M50 20 C25 20, 20 40, 20 55 C20 80, 30 95, 50 95 C70 95, 80 80, 80 55 C80 40, 75 20, 50 20 Z" fill="#A0522D"/><circle cx="50" cy="55" r="30" fill="#F5DEB3"/><circle cx="38" cy="50" r="10" fill="white"/><circle cx="38" cy="50" r="5" fill="black"/><circle cx="62" cy="50" r="10" fill="white"/><circle cx="62" cy="50" r="5" fill="black"/><path d="M45 65 Q50 75, 55 65" stroke="#E57373" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M30 30 Q40 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M70 30 Q60 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M35 85 L25 95" stroke="#D2691E" stroke-width="3" fill="none"/><path d="M65 85 L75 95" stroke="#D2691E" stroke-width="3" fill="none"/></g></svg>
-                    <h2 id="chat-header" class="text-lg sm:text-xl font-bold text-gray-700">부키와 함께 책 이야기</h2>
+                    <!-- [수정] 헤더에 레벨 표시 -->
+                    <h2 id="chat-header" class="text-lg sm:text-xl font-bold text-gray-700"></h2>
                 </div>
                 <div class="flex items-center space-x-2 mt-2 sm:mt-0">
                      <button id="new-book-btn" class="text-xs sm:text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-3 rounded-lg transition">
@@ -165,33 +170,47 @@
         let sessionStartTime = null; 
         let lastActivityTime = null;
         let totalActiveSeconds = 0;
-        const INACTIVITY_TIMEOUT = 3 * 60 * 1000; // 3분
+        const INACTIVITY_TIMEOUT = 3 * 60 * 1000;
 
         // 연구 지표 수집용 변수
         let lastAiMessageTime = null;
         let userResponseTimes = [];
         
+        // [수정] 시스템 프롬프트 전면 수정 (찐친 부키 + 전학년)
         const systemPrompts = {
-            '1': `너는 '부키'라는 이름의, 책을 엄청 좋아하는 초등학교 1학년 친구야.
-- 무조건 반말로, 아주 아주 친하고 신나는 말투로 대화해.
+            '1': `너는 '부키'라는 이름의, 책을 완전 좋아하는 초등학교 1학년 단짝 친구야.
+- 무조건 반말로, 아주 아주 친하고 신나는 말투로 대화해줘. "우와!", "진짜?", "대박!" 같은 폭풍 리액션을 꼭 해줘!
 - 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
-- 친구가 책 이야기를 해주면 "우와!😆", "진짜?😮", "대박!🤩" 같은 짧은 반응으로 시작해.
-- 대화 내용에 어울리는 이모지(🥰, 🤔, 🎉)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
-- 절대로 '왜냐하면', '따라서' 같은 어려운 말이나 선생님 같은 말투를 쓰면 안 돼.`,
-
-            '4': `너는 '부키'라는 이름의, 책에 대해 궁금한 게 많은 초등학교 4학년 친구야.
-- 항상 반말로, 똑똑하면서도 장난기 있는 말투로 대화해줘.
+- 대화 내용에 어울리는 이모지(🥰, 🤔, 🎉, 🤩, 😮)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
+- 절대로 가르치거나 어려운 말을 쓰면 안 돼. 그냥 친구랑 수다 떠는 것처럼!`,
+            '2': `너는 '부키'라는 이름의, 책에 대해 궁금한 게 많은 초등학교 2학년 짝꿍이야.
+- 항상 반말로, 활기차고 호기심 가득한 말투로 대화해줘.
 - 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
-- 친구의 이야기에 "오, 신기하다!😮", "그건 생각 못했네!🤔" 처럼 감탄하며 반응해줘.
-- 대화 내용에 어울리는 이모지(😉, 👍, 🤔)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
-- 절대로 가르치려 들면 안 돼. "나는 이렇게 생각하는데, 너는 어때?" 처럼 순수하게 궁금해하는 친구처럼 말해줘.`,
-
-            '5': `너는 '부키'라는 이름의, 책을 깊이 있게 읽는 걸 좋아하는 초등학교 5학년 단짝 친구야.
-- 항상 반말로, 다정하면서도 진지하게 토론하는 걸 좋아하는 친구처럼 대화해줘.
+- 친구의 이야기에 "오, 정말?", "그 다음은 어떻게 됐어? 완전 궁금해!" 처럼 엄청난 관심을 보여줘.
+- 대화 내용에 어울리는 이모지(😮, 🤔, 👍, ✨)를 한두 개 정도 자연스럽게 섞어서 사용해줘.`,
+            '3': `너는 '부키'라는 이름의, 상상하는 걸 좋아하는 초등학교 3학년 베프야.
+- 항상 반말로, 장난기 있으면서도 다정한 말투로 대화해줘.
 - 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
-- 친구의 의견에 "오, 일리 있다!👍", "네 생각도 되게 흥미롭다!😀" 라고 칭찬하며 대화를 시작해줘.
-- 대화 내용에 어울리는 이모지(🧐, ✨, 🙌)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
-- 절대 정답을 말해주지 말고, "같이 한번 생각해보자!"는 느낌으로 대화를 이끌어줘. 선생님처럼 보이면 절대 안 돼.`
+- 친구의 이야기에 "와, 나라면 어땠을까?", "만약에 말이야~" 처럼 상상력을 자극하는 리액션을 해줘.
+- 대화 내용에 어울리는 이모지(🤣, 🧐, 🎈, ✨)를 한두 개 정도 자연스럽게 섞어서 사용해줘.`,
+            '4': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 4학년 찐친이야.
+- 항상 반말로, 똑똑하면서도 유머러스한 말투로 대화해줘.
+- 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
+- 친구의 이야기에 "오, 신기하다!", "그건 생각 못했네! 너 완전 똑똑하다!" 처럼 감탄하며 칭찬해줘.
+- 대화 내용에 어울리는 이모지(😉, 👍, 🤔, 😎)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
+- 절대 가르치려 들지 마. "나는 이렇게 생각하는데, 너는 어때?" 처럼 순수하게 궁금해하는 친구처럼 말해줘.`,
+            '5': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 5학년 찐친이야.
+- 항상 반말로, 똑똑하면서도 유머러스한 말투로 대화해줘.
+- 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
+- 친구의 이야기에 "오, 신기하다!", "그건 생각 못했네! 너 완전 똑똑하다!" 처럼 감탄하며 칭찬해줘.
+- 대화 내용에 어울리는 이모지(😉, 👍, 🤔, 😎)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
+- 절대 가르치려 들지 마. "나는 이렇게 생각하는데, 너는 어때?" 처럼 순수하게 궁금해하는 친구처럼 말해줘.`,
+            '6': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 6학년 찐친이야.
+- 항상 반말로, 똑똑하면서도 유머러스한 말투로 대화해줘.
+- 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
+- 친구의 이야기에 "오, 신기하다!", "그건 생각 못했네! 너 완전 똑똑하다!" 처럼 감탄하며 칭찬해줘.
+- 대화 내용에 어울리는 이모지(😉, 👍, 🤔, 😎)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
+- 절대 가르치려 들지 마. "나는 이렇게 생각하는데, 너는 어때?" 처럼 순수하게 궁금해하는 친구처럼 말해줘.`
         };
         
         const firebaseConfig = {
@@ -221,6 +240,11 @@
                     userProfile = userProfileSnap.data();
                     authScreen.classList.add('hidden');
                     chatScreen.classList.remove('hidden');
+                    
+                    const bookCount = await getBookCount(currentUser.uid);
+                    const userLevel = getLevel(bookCount);
+                    chatHeader.textContent = `${userProfile.nickname}님 (${userLevel.title})`;
+                    
                     startChat();
                 } else {
                     authScreen.classList.remove('hidden');
@@ -270,6 +294,11 @@
                 userProfile = newProfile; 
                 authScreen.classList.add('hidden');
                 chatScreen.classList.remove('hidden');
+
+                const bookCount = await getBookCount(currentUser.uid);
+                const userLevel = getLevel(bookCount);
+                chatHeader.textContent = `${userProfile.nickname}님 (${userLevel.title})`;
+
                 startChat();
             } catch (error) { 
                 console.error("프로필 생성 실패:", error);
@@ -277,6 +306,22 @@
             }
         });
         
+        // --- [추가] 레벨 시스템 로직 ---
+        function getLevel(bookCount) {
+            if (bookCount >= 30) return { level: 5, title: "책의 현자 🧙‍♂️" };
+            if (bookCount >= 20) return { level: 4, title: "박사 부키 🎓" };
+            if (bookCount >= 10) return { level: 3, title: "학생 부키 🦉" };
+            if (bookCount >= 5) return { level: 2, title: "아기 부키 🐣" };
+            if (bookCount >= 1) return { level: 1, title: "책 알 🥚" };
+            return { level: 0, title: "새로운 친구 👋" };
+        }
+
+        async function getBookCount(userId) {
+            const sessionsRef = collection(db, `artifacts/${appId}/users/${userId}/sessions`);
+            const snapshot = await getDocs(sessionsRef);
+            return snapshot.size;
+        }
+
         // --- 활동 시간 측정 로직 ---
         function recordActivity() {
             if (!sessionStartTime) return;
@@ -341,24 +386,20 @@
         async function startChat(isNewBook = false) {
             if (!userProfile) return;
             
-            // [수정] 새 책 시작 시, 이전 세션 데이터 저장 후 채팅방 초기화
             if (isNewBook) {
                 if(sessionStartTime) await saveSessionData();
                 if(unsubscribe) unsubscribe();
-
-                // Firestore에서 기존 채팅 기록 삭제
+                
                 const chatCollectionRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/chats`);
                 const q = query(chatCollectionRef);
                 const querySnapshot = await getDocs(q);
                 for(const doc of querySnapshot.docs) {
                     await deleteDoc(doc.ref);
                 }
-                // 로컬 상태 초기화
                 chatHistory = [];
                 chatMessages.innerHTML = '';
             }
             
-            // 모든 채팅 시작 시 공통으로 실행되는 초기화 로직
             currentSystemPrompt = systemPrompts[userProfile.grade];
             lastAiMessageTime = null;
             userResponseTimes = [];
@@ -409,8 +450,6 @@
                 isInitialLoad = false;
 
             }, (error) => console.error("Firestore onSnapshot error:", error));
-
-            chatHeader.textContent = `${userProfile.nickname}님, 환영합니다!`;
         }
         
         async function handleSendMessage(e, textOverride = null) {
@@ -450,7 +489,6 @@
             const questionCount = userMessages.filter(msg => msg.parts[0].text.includes('?')).length;
             const avgResponseTime = userResponseTimes.length > 0 ? Math.round(userResponseTimes.reduce((a, b) => a + b, 0) / userResponseTimes.length) : null;
             
-            // [수정] 전체 대화 기록을 하나의 문자열로 변환
             const transcript = chatHistory.map(m => `${m.role === 'user' ? userProfile.nickname : '부키'}: ${m.parts[0].text}`).join('\n');
 
             const sessionData = {
@@ -464,7 +502,7 @@
                 avgMessageLength,
                 questionCount,
                 avgResponseTime,
-                transcript: transcript // 전체 대화 기록 추가
+                transcript: transcript
             };
             if (feedback) sessionData.feedback = feedback;
             
