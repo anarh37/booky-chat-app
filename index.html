@@ -59,7 +59,6 @@
 
     <div id="app-container" class="max-w-2xl mx-auto h-full flex flex-col p-2 sm:p-4">
         
-        <!-- 로딩 스피너 -->
         <div id="app-loader" class="flex flex-col items-center justify-center text-center h-full">
             <svg class="animate-spin -ml-1 mr-3 h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -69,41 +68,38 @@
         </div>
 
 
-        <!-- 화면 1: 로그인 / 회원가입 화면 -->
         <div id="auth-screen" class="hidden flex flex-col items-center justify-center text-center h-full fade-in">
              <div class="mb-6">
                 <svg width="120" height="120" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0, -5)"><path d="M50 20 C25 20, 20 40, 20 55 C20 80, 30 95, 50 95 C70 95, 80 80, 80 55 C80 40, 75 20, 50 20 Z" fill="#A0522D"/><circle cx="50" cy="55" r="30" fill="#F5DEB3"/><circle cx="38" cy="50" r="10" fill="white"/><circle cx="38" cy="50" r="5" fill="black"/><circle cx="62" cy="50" r="10" fill="white"/><circle cx="62" cy="50" r="5" fill="black"/><path d="M45 65 Q50 75, 55 65" stroke="#E57373" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M30 30 Q40 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M70 30 Q60 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M35 85 L25 95" stroke="#D2691E" stroke-width="3" fill="none"/><path d="M65 85 L75 95" stroke="#D2691E" stroke-width="3" fill="none"/></g></svg>
-            </div>
-            <div id="login-container">
-                <h1 class="text-4xl font-bold text-[#4A4A4A] mb-2">부키와 책 이야기 시작하기!</h1>
-                <p class="text-xl text-gray-600 mb-8">Google 계정으로 간편하게 시작해봐!</p>
-                <button id="google-signin-btn" class="w-full max-w-sm bg-white hover:bg-gray-100 text-gray-700 font-semibold py-3 px-4 border border-gray-300 rounded-lg shadow-sm flex items-center justify-center transition">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-6 h-6 mr-3">
-                    Google 계정으로 로그인
-                </button>
-            </div>
-             <div id="signup-container" class="hidden w-full">
-                <h1 class="text-3xl font-bold text-[#4A4A4A] mb-2">거의 다 됐어!</h1>
-                <p class="text-lg text-gray-600 mb-6">부키가 너를 더 잘 알 수 있게 닉네임과 학년을 알려줘.</p>
-                <form id="signup-form" class="w-full max-w-sm mx-auto space-y-4">
-                    <input id="nickname-input" type="text" placeholder="닉네임 (예: 책사랑)" class="w-full p-4 text-lg border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                    <select id="grade-select" class="w-full p-4 text-lg border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400" required>
-                        <option value="" disabled selected>학년을 선택해줘</option>
-                        <option value="1">1학년</option>
-                        <option value="2">2학년</option>
-                        <option value="3">3학년</option>
-                        <option value="4">4학년</option>
-                        <option value="5">5학년</option>
-                        <option value="6">6학년</option>
-                    </select>
-                    <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white text-xl font-bold py-4 px-6 rounded-xl shadow-md transition transform hover:scale-105">시작하기</button>
-                </form>
              </div>
+             <div id="login-container">
+                 <h1 class="text-4xl font-bold text-[#4A4A4A] mb-2">부키와 책 이야기 시작하기!</h1>
+                 <p class="text-xl text-gray-600 mb-8">Google 계정으로 간편하게 시작해봐!</p>
+                 <button id="google-signin-btn" class="w-full max-w-sm bg-white hover:bg-gray-100 text-gray-700 font-semibold py-3 px-4 border border-gray-300 rounded-lg shadow-sm flex items-center justify-center transition">
+                     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-6 h-6 mr-3">
+                     Google 계정으로 로그인
+                 </button>
+             </div>
+              <div id="signup-container" class="hidden w-full">
+                 <h1 class="text-3xl font-bold text-[#4A4A4A] mb-2">거의 다 됐어!</h1>
+                 <p class="text-lg text-gray-600 mb-6">부키가 너를 더 잘 알 수 있게 닉네임과 학년을 알려줘.</p>
+                 <form id="signup-form" class="w-full max-w-sm mx-auto space-y-4">
+                     <input id="nickname-input" type="text" placeholder="닉네임 (예: 책사랑)" class="w-full p-4 text-lg border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                     <select id="grade-select" class="w-full p-4 text-lg border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400" required>
+                         <option value="" disabled selected>학년을 선택해줘</option>
+                         <option value="1">1학년</option>
+                         <option value="2">2학년</option>
+                         <option value="3">3학년</option>
+                         <option value="4">4학년</option>
+                         <option value="5">5학년</option>
+                         <option value="6">6학년</option>
+                     </select>
+                     <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white text-xl font-bold py-4 px-6 rounded-xl shadow-md transition transform hover:scale-105">시작하기</button>
+                 </form>
+              </div>
         </div>
 
-        <!-- 메인 앱 레이아웃 -->
         <div id="main-app" class="hidden relative w-full h-full">
-            <!-- 사이드바 -->
             <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-20"></div>
             <div id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-gray-800 text-white flex flex-col transform -translate-x-full z-30">
                 <div class="p-4 flex justify-between items-center border-b border-gray-700">
@@ -111,14 +107,12 @@
                     <button id="close-sidebar-btn" class="text-gray-400 hover:text-white">&times;</button>
                 </div>
                 <div id="sidebar-content" class="flex-1 overflow-y-auto p-2">
-                    <!-- 독서 기록 목록이 여기에 추가됩니다 -->
-                </div>
+                    </div>
                 <button id="sidebar-new-chat-btn" class="w-full text-left p-4 hover:bg-gray-700 border-t border-gray-700">
                     <i class="fas fa-plus-circle mr-2"></i>새로운 책 이야기
                 </button>
             </div>
 
-            <!-- 채팅창 -->
             <div id="chat-screen" class="w-full h-full flex flex-col bg-white rounded-2xl shadow-xl overflow-hidden">
                 <header class="bg-gray-100 p-3 sm:p-4 border-b flex items-center justify-between flex-wrap">
                     <div class="flex items-center">
@@ -147,7 +141,6 @@
                 </footer>
             </div>
             
-            <!-- 화면 3: 만족도 평가 -->
             <div id="feedback-screen" class="hidden flex flex-col items-center justify-center text-center h-full fade-in">
                 <h2 class="text-3xl font-bold text-gray-700 mb-6">오늘 대화는 어땠어?</h2>
                 <div class="flex space-x-8">
@@ -218,29 +211,29 @@
 - 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
 - 대화 내용에 어울리는 이모지(🥰, 🤔, 🎉, 🤩, 😮)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
 - 절대로 가르치거나 어려운 말을 쓰면 안 돼. 그냥 친구랑 수다 떠는 것처럼!`,
-            '2': `너는 '부키'라는 이름의, 책에 대해 궁금한 게 많은 초등학교 2학년 짝꿍이야.
+             '2': `너는 '부키'라는 이름의, 책에 대해 궁금한 게 많은 초등학교 2학년 짝꿍이야.
 - 항상 반말로, 활기차고 호기심 가득한 말투로 대화해줘.
 - 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
 - 친구의 이야기에 "오, 정말?", "그 다음은 어떻게 됐어? 완전 궁금해!" 처럼 엄청난 관심을 보여줘.
 - 대화 내용에 어울리는 이모지(😮, 🤔, 👍, ✨)를 한두 개 정도 자연스럽게 섞어서 사용해줘.`,
-            '3': `너는 '부키'라는 이름의, 상상하는 걸 좋아하는 초등학교 3학년 베프야.
+             '3': `너는 '부키'라는 이름의, 상상하는 걸 좋아하는 초등학교 3학년 베프야.
 - 항상 반말로, 장난기 있으면서도 다정한 말투로 대화해줘.
 - 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
 - 친구의 이야기에 "와, 나라면 어땠을까?", "만약에 말이야~" 처럼 상상력을 자극하는 리액션을 해줘.
 - 대화 내용에 어울리는 이모지(🤣, 🧐, 🎈, ✨)를 한두 개 정도 자연스럽게 섞어서 사용해줘.`,
-            '4': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 4학년 찐친이야.
+             '4': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 4학년 찐친이야.
 - 항상 반말로, 똑똑하면서도 유머러스한 말투로 대화해줘.
 - 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
 - 친구의 이야기에 "오, 신기하다!", "그건 생각 못했네! 너 완전 똑똑하다!" 처럼 감탄하며 칭찬해줘.
 - 대화 내용에 어울리는 이모지(😉, 👍, 🤔, 😎)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
 - 절대 가르치려 들지 마. "나는 이렇게 생각하는데, 너는 어때?" 처럼 순수하게 궁금해하는 친구처럼 말해줘.`,
-            '5': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 5학년 찐친이야.
+             '5': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 5학년 찐친이야.
 - 항상 반말로, 똑똑하면서도 유머러스한 말투로 대화해줘.
 - 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
 - 친구의 이야기에 "오, 신기하다!", "그건 생각 못했네! 너 완전 똑똑하다!" 처럼 감탄하며 칭찬해줘.
 - 대화 내용에 어울리는 이모지(😉, 👍, 🤔, 😎)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
 - 절대 가르치려 들지 마. "나는 이렇게 생각하는데, 너는 어때?" 처럼 순수하게 궁금해하는 친구처럼 말해줘.`,
-            '6': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 6학년 찐친이야.
+             '6': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 6학년 찐친이야.
 - 항상 반말로, 똑똑하면서도 유머러스한 말투로 대화해줘.
 - 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
 - 친구의 이야기에 "오, 신기하다!", "그건 생각 못했네! 너 완전 똑똑하다!" 처럼 감탄하며 칭찬해줘.
@@ -345,11 +338,11 @@
         // --- 레벨 시스템 로직 ---
         function getLevel(bookCount) {
              if (bookCount >= 30) return { level: 5, title: "책의 현자 🧙‍♂️" };
-            if (bookCount >= 20) return { level: 4, title: "박사 부키 🎓" };
-            if (bookCount >= 10) return { level: 3, title: "학생 부키 🦉" };
-            if (bookCount >= 5) return { level: 2, title: "아기 부키 🐣" };
-            if (bookCount >= 1) return { level: 1, title: "책 알 🥚" };
-            return { level: 0, title: "새로운 친구 👋" };
+             if (bookCount >= 20) return { level: 4, title: "박사 부키 🎓" };
+             if (bookCount >= 10) return { level: 3, title: "학생 부키 🦉" };
+             if (bookCount >= 5) return { level: 2, title: "아기 부키 🐣" };
+             if (bookCount >= 1) return { level: 1, title: "책 알 🥚" };
+             return { level: 0, title: "새로운 친구 👋" };
         }
 
         async function getBookCount(userId) {
@@ -474,11 +467,11 @@
 
         async function createNewSession(bookTitle) {
              const sessionData = {
-                bookTitle: bookTitle, 
-                nickname: userProfile.nickname,
-                grade: userProfile.grade,
-                startTime: serverTimestamp(),
-            };
+                 bookTitle: bookTitle, 
+                 nickname: userProfile.nickname,
+                 grade: userProfile.grade,
+                 startTime: serverTimestamp(),
+             };
             const sessionsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions`);
             const docRef = await addDoc(sessionsRef, sessionData);
             currentSessionId = docRef.id;
@@ -613,23 +606,46 @@
         
         chatForm.addEventListener('submit', handleSendMessage);
         
-        logoutBtn.addEventListener('click', () => { 
-            // [수정] 피드백 전에 세션 데이터를 저장하는 로직을 제거합니다.
-            mainApp.classList.add('hidden'); 
-            feedbackScreen.classList.remove('hidden'); 
+        // ==========================================================
+        // ===== 아래 로그아웃 관련 로직을 수정했습니다. ================
+        // ==========================================================
+
+        // 1. '로그아웃' 버튼을 클릭하면 만족도 평가 화면을 보여줍니다.
+        logoutBtn.addEventListener('click', () => {
+            // 현재 채팅 화면을 숨깁니다.
+            mainApp.classList.add('hidden');
+            // 만족도 평가 화면을 보여줍니다.
+            feedbackScreen.classList.remove('hidden');
             feedbackScreen.classList.add('fade-in');
         });
 
+        // 2. 만족도 평가 버튼(이모지) 중 하나를 클릭하면,
+        //    세션 데이터를 저장하고 실제로 로그아웃을 처리합니다.
         document.querySelectorAll('.feedback-btn').forEach(button => {
             button.addEventListener('click', async (e) => {
                 const feedback = e.target.dataset.feedback;
+
+                // 대화 세션이 생성된 경우에만 피드백과 함께 세션 데이터를 저장합니다.
+                // saveSessionData 함수 내부에 currentSessionId가 있는지 확인하는 로직이
+                // 이미 있으므로, 그냥 호출해도 안전합니다.
                 await saveSessionData(feedback);
+                
+                // Firestore로부터 실시간 데이터 수신을 중단합니다.
                 if (unsubscribeChats) unsubscribeChats();
                 if (unsubscribeSessions) unsubscribeSessions();
+                
+                // Firebase 로그아웃을 실행합니다.
                 await signOut(auth);
-                // window.location.reload(); // 불필요한 새로고침 제거
+                
+                // 로그아웃이 성공하면 onAuthStateChanged 리스너가 자동으로
+                // UI를 로그인 화면으로 변경해주므로, 여기서 별도의 UI 변경 코드는 필요 없습니다.
             });
         });
+
+        // ==========================================================
+        // ===== 수정 끝 ============================================
+        // ==========================================================
+
         window.addEventListener('beforeunload', () => { if (sessionStartTime && currentSessionId) saveSessionData(); });
     </script>
 </body>
