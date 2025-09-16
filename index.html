@@ -284,8 +284,7 @@
             const userProfileRef = doc(db, `artifacts/${appId}/users`, currentUser.uid);
             await setDoc(userProfileRef, newProfile);
             
-            // [수정] 프로필 저장 후 UI 전환 로직 추가
-            userProfile = newProfile; // 전역 변수 업데이트
+            userProfile = newProfile;
             authScreen.classList.add('hidden');
             mainApp.classList.remove('hidden');
 
@@ -370,10 +369,17 @@
             resetActivityTracker();
 
             const lastBook = await getLastBookTitle();
-            let initialGreeting = `안녕, ${userProfile.nickname}! 오늘 어떤 책을 읽었는지 책 제목을 알려줄래?`;
-            if (lastBook) {
+            let initialGreeting = '';
+            
+            // [수정] 신규 사용자와 기존 사용자의 첫인사를 분리합니다.
+            if (lastBook && lastBook !== "N/A (대화 시작 안 함)") {
+                // 이전 대화 기록이 있는 사용자
                 initialGreeting = `안녕, ${userProfile.nickname}! 우리 지난번에 『${lastBook}』에 대해 이야기 나눠서 정말 즐거웠어. 오늘은 어떤 새로운 책을 읽었는지 알려줄래?`;
+            } else {
+                // 완전히 처음 사용하는 신규 사용자
+                initialGreeting = `반가워, ${userProfile.nickname}! 나는 책을 좋아하는 부키야. 우리 같이 재미있는 책 이야기 해볼까? 오늘 어떤 책을 읽었는지 알려줘!`;
             }
+            
             addMessageToUI('ai', initialGreeting);
             chatHistory.push({ role: 'model', parts: [{ text: initialGreeting }]});
         }
@@ -553,13 +559,4 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
 
