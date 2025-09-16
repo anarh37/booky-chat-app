@@ -43,7 +43,7 @@ exports.handler = async (event) => {
       spreadsheetId: SPREADSHEET_ID,
       // [수정] 'A1' 대신, 우리가 지정한 시트 이름(SHEET_NAME)으로 변경합니다.
       // 이렇게 해야 로봇이 정확한 시트를 찾아갈 수 있습니다.
-      range: SHEET_NAME, 
+      range: Sessions, 
       valueInputOption: 'USER_ENTERED',
       resource: {
         values: [newRow],
