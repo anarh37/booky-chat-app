@@ -627,12 +627,14 @@
                 if (unsubscribeChats) unsubscribeChats();
                 if (unsubscribeSessions) unsubscribeSessions();
                 await signOut(auth);
-                window.location.reload();
+                // window.location.reload(); // [수정] 이 부분을 제거하여 로그아웃 후 화면이 자연스럽게 전환되도록 합니다.
             });
         });
         window.addEventListener('beforeunload', () => { if (sessionStartTime && currentSessionId) saveSessionData(); });
     </script>
 </body>
 </html>
+
+
 
 
