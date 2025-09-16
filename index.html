@@ -52,7 +52,7 @@
     </style>
 </head>
 <body class="bg-[#F0F4F8] overflow-hidden">
-    
+
     <div id="app-container" class="max-w-2xl mx-auto h-screen flex flex-col p-2 sm:p-4">
         
         <!-- 로딩 스피너 -->
@@ -63,8 +63,8 @@
             </svg>
             <p class="mt-4 text-gray-600">준비 중...</p>
         </div>
-    
-    
+
+
         <!-- 화면 1: 로그인 / 회원가입 화면 -->
         <div id="auth-screen" class="hidden flex flex-col items-center justify-center text-center h-full fade-in">
              <div class="mb-6">
@@ -96,8 +96,8 @@
                 </form>
              </div>
         </div>
-    
-        <!-- 메인 앱 레이아웃 (사이드바 + 채팅창) -->
+
+        <!-- [수정] 메인 앱 레이아웃 (사이드바 + 채팅창) -->
         <div id="main-app" class="hidden relative w-full h-full">
             <!-- 사이드바 -->
             <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-20"></div>
@@ -113,36 +113,34 @@
                     <i class="fas fa-plus-circle mr-2"></i>새로운 책 이야기
                 </button>
             </div>
-    
+
             <!-- 채팅창 -->
             <div id="chat-screen" class="w-full h-full flex flex-col bg-white rounded-2xl shadow-xl overflow-hidden">
                 <header class="bg-gray-100 p-3 sm:p-4 border-b flex items-center justify-between flex-wrap">
                     <div class="flex items-center">
                         <button id="open-sidebar-btn" class="mr-3 text-xl text-gray-600 hover:text-black"><i class="fas fa-bars"></i></button>
                         <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="mr-3"><g transform="translate(0, -5)"><path d="M50 20 C25 20, 20 40, 20 55 C20 80, 30 95, 50 95 C70 95, 80 80, 80 55 C80 40, 75 20, 50 20 Z" fill="#A0522D"/><circle cx="50" cy="55" r="30" fill="#F5DEB3"/><circle cx="38" cy="50" r="10" fill="white"/><circle cx="38" cy="50" r="5" fill="black"/><circle cx="62" cy="50" r="10" fill="white"/><circle cx="62" cy="50" r="5" fill="black"/><path d="M45 65 Q50 75, 55 65" stroke="#E57373" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M30 30 Q40 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M70 30 Q60 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M35 85 L25 95" stroke="#D2691E" stroke-width="3" fill="none"/><path d="M65 85 L75 95" stroke="#D2691E" stroke-width="3" fill="none"/></g></svg>
-                        <h2 id="chat-header" class="text-lg sm:text-xl font-bold text-gray-700"></h2>
-                    </div>
-                    <div class="flex items-center space-x-2 mt-2 sm:mt-0">
-                         <div id="user-info" class="text-sm text-right"></div>
-                        <button id="logout-btn" class="text-xs sm:text-sm bg-red-100 hover:bg-red-200 text-red-700 font-semibold py-2 px-3 rounded-lg transition">
-                            <i class="fas fa-sign-out-alt mr-1"></i> 로그아웃
-                        </button>
-                    </div>
-                </header>
-                <main id="chat-messages" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4"></main>
-                <div id="loading-indicator" class="hidden p-4 sm:p-6 flex items-center space-x-2">
-                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
-                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
-                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
-                    <span class="text-sm text-gray-500">부키가 생각 중...</span>
+                    <h2 id="chat-header" class="text-lg sm:text-xl font-bold text-gray-700"></h2>
                 </div>
-                <footer class="p-2 sm:p-4 border-t bg-gray-50">
-                    <form id="chat-form" class="flex items-center space-x-2 sm:space-x-3">
-                        <input id="chat-input" type="text" placeholder="여기에 너의 생각을 입력해봐!" class="flex-1 p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400" autocomplete="off">
-                        <button id="send-btn" type="submit" class="bg-blue-500 hover:bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl transition transform hover:scale-110"><i class="fas fa-paper-plane"></i></button>
-                    </form>
-                </footer>
+                <div class="flex items-center space-x-2 mt-2 sm:mt-0">
+                    <button id="logout-btn" class="text-xs sm:text-sm bg-red-100 hover:bg-red-200 text-red-700 font-semibold py-2 px-3 rounded-lg transition">
+                        <i class="fas fa-sign-out-alt mr-1"></i> 로그아웃
+                    </button>
+                </div>
+            </header>
+            <main id="chat-messages" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4"></main>
+            <div id="loading-indicator" class="hidden p-4 sm:p-6 flex items-center space-x-2">
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
+                <span class="text-sm text-gray-500">부키가 생각 중...</span>
             </div>
+            <footer class="p-2 sm:p-4 border-t bg-gray-50">
+                <form id="chat-form" class="flex items-center space-x-2 sm:space-x-3">
+                    <input id="chat-input" type="text" placeholder="여기에 너의 생각을 입력해봐!" class="flex-1 p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400" autocomplete="off">
+                    <button id="send-btn" type="submit" class="bg-blue-500 hover:bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl transition transform hover:scale-110"><i class="fas fa-paper-plane"></i></button>
+                </form>
+            </footer>
         </div>
         
         <!-- 화면 3: 만족도 평가 -->
@@ -155,12 +153,12 @@
             </div>
         </div>
     </div>
-    
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, query, doc, getDoc, setDoc, deleteDoc, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    
+
         // UI 요소
         const appLoader = document.getElementById('app-loader');
         const authScreen = document.getElementById('auth-screen');
@@ -172,12 +170,12 @@
         const chatInput = document.getElementById('chat-input');
         const loadingIndicator = document.getElementById('loading-indicator');
         const logoutBtn = document.getElementById('logout-btn');
+        const newBookBtn = document.getElementById('new-book-btn');
         const sendBtn = document.getElementById('send-btn');
         const signupForm = document.getElementById('signup-form');
         const nicknameInput = document.getElementById('nickname-input');
         const gradeSelect = document.getElementById('grade-select');
         const chatHeader = document.getElementById('chat-header');
-        const userInfo = document.getElementById('user-info');
         const googleSigninBtn = document.getElementById('google-signin-btn');
         const loginContainer = document.getElementById('login-container');
         const signupContainer = document.getElementById('signup-container');
@@ -187,7 +185,7 @@
         const closeSidebarBtn = document.getElementById('close-sidebar-btn');
         const sidebarContent = document.getElementById('sidebar-content');
         const sidebarNewChatBtn = document.getElementById('sidebar-new-chat-btn');
-    
+
         // 전역 상태 변수
         let currentUser = null;
         let userProfile = null;
@@ -199,13 +197,13 @@
         let currentBookTitle = null; 
         let currentTopicTurn = 0; 
         let currentSessionId = null;
-    
+
         // 활동 시간 측정 관련 변수
         let sessionStartTime = null; 
         let lastActivityTime = null;
         let totalActiveSeconds = 0;
         const INACTIVITY_TIMEOUT = 3 * 60 * 1000;
-    
+
         // 연구 지표 수집용 변수
         let lastAiMessageTime = null;
         let userResponseTimes = [];
@@ -255,12 +253,12 @@
             appId: "1:571083167086:web:ca1b21400e2600764cdd7f",
             measurementId: "G-2R6LETEFSH"
         };
-    
+
         const appId = firebaseConfig.appId;
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-    
+
         // --- 인증 및 라우팅 로직 ---
         onAuthStateChanged(auth, async (user) => {
             appLoader.classList.add('hidden');
@@ -268,16 +266,18 @@
                 currentUser = user;
                 const userProfileRef = doc(db, `artifacts/${appId}/users`, currentUser.uid);
                 const userProfileSnap = await getDoc(userProfileRef);
-    
+
                 if (userProfileSnap.exists() && userProfileSnap.data().nickname) {
                     userProfile = userProfileSnap.data();
                     authScreen.classList.add('hidden');
                     mainApp.classList.remove('hidden');
                     
-                    await updateUserHeader(); // [수정] 헤더 업데이트 함수 호출
+                    const bookCount = await getBookCount(currentUser.uid);
+                    const userLevel = getLevel(bookCount);
+                    chatHeader.innerHTML = `${userProfile.nickname}님 <span class="text-base font-medium text-gray-500">(${userLevel.title})</span>`;
                     
-                    loadSessionsToSidebar(); // 사이드바에 과거 대화 목록 로드
-                    startNewChat(); // 새 채팅 시작
+                    loadSessionsToSidebar();
+                    startNewChat();
                 } else {
                     authScreen.classList.remove('hidden');
                     mainApp.classList.add('hidden');
@@ -304,11 +304,11 @@
                     alert("Google 로그인에 실패했습니다. 팝업이 차단되었는지 확인해주세요.");
                 });
         });
-    
+
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!currentUser) return;
-    
+
             const nickname = nicknameInput.value.trim();
             const grade = gradeSelect.value;
             if (!nickname || !grade) return alert("닉네임과 학년을 모두 선택해주세요!");
@@ -326,9 +326,11 @@
                 userProfile = newProfile; 
                 authScreen.classList.add('hidden');
                 mainApp.classList.remove('hidden');
-    
-                await updateUserHeader(); // [수정] 헤더 업데이트 함수 호출
-                loadSessionsToSidebar();
+
+                const bookCount = await getBookCount(currentUser.uid);
+                const userLevel = getLevel(bookCount);
+                chatHeader.innerHTML = `${userProfile.nickname}님 <span class="text-base font-medium text-gray-500">(${userLevel.title})</span>`;
+
                 startNewChat();
             } catch (error) { 
                 console.error("프로필 생성 실패:", error);
@@ -336,31 +338,22 @@
             }
         });
         
-        // --- 레벨 시스템 및 헤더 로직 ---
+        // --- 레벨 시스템 로직 ---
         function getLevel(bookCount) {
-             if (bookCount >= 30) return { level: 5, title: "책의 현자 🧙‍♂" };
+             if (bookCount >= 30) return { level: 5, title: "책의 현자 🧙‍♂️" };
             if (bookCount >= 20) return { level: 4, title: "박사 부키 🎓" };
             if (bookCount >= 10) return { level: 3, title: "학생 부키 🦉" };
             if (bookCount >= 5) return { level: 2, title: "아기 부키 🐣" };
             if (bookCount >= 1) return { level: 1, title: "책 알 🥚" };
             return { level: 0, title: "새로운 친구 👋" };
         }
-    
+
         async function getBookCount(userId) {
             const sessionsRef = collection(db, `artifacts/${appId}/users/${userId}/sessions`);
-            const q = query(sessionsRef, where("bookTitle", "!=", null)); // 책 제목이 있는 세션만 카운트
-            const snapshot = await getDocs(q);
+            const snapshot = await getDocs(sessionsRef);
             return snapshot.size;
         }
 
-        // [신규] 사용자 닉네임과 레벨을 헤더에 업데이트하는 함수
-        async function updateUserHeader() {
-            if (!userProfile) return;
-            const bookCount = await getBookCount(currentUser.uid);
-            const userLevel = getLevel(bookCount);
-            userInfo.innerHTML = `<strong>${userProfile.nickname}</strong> <span class="text-gray-500">(${userLevel.title})</span>`;
-        }
-    
         // --- 활동 시간 측정 로직 ---
         function recordActivity() {
             if (!sessionStartTime) return;
@@ -373,14 +366,14 @@
             }
             lastActivityTime = now;
         }
-    
+
         function resetActivityTracker() {
             ['mousemove', 'keydown', 'click', 'scroll'].forEach(event => window.removeEventListener(event, recordActivity));
             ['mousemove', 'keydown', 'click', 'scroll'].forEach(event => window.addEventListener(event, recordActivity));
             lastActivityTime = Date.now();
             totalActiveSeconds = 0;
         }
-    
+
         // --- UI 및 채팅 로직 ---
         function addMessageToUI(sender, text) {
             const messageDiv = document.createElement('div');
@@ -404,7 +397,7 @@
                 await addDoc(chatCollectionRef, { role, text, createdAt: serverTimestamp() });
             } catch (error) { console.error("메시지 저장 실패:", error); }
         }
-    
+
         async function getLastBookTitle() {
             if (!currentUser) return null;
             try {
@@ -420,13 +413,13 @@
                 return null;
             }
         }
-    
+
         async function startNewChat() {
-            if (unsubscribeChats) unsubscribeChats(); // 이전 채팅 리스너 해제
+            if (unsubscribeChats) unsubscribeChats();
             chatHistory = [];
             chatMessages.innerHTML = '';
-            currentSessionId = null;
-    
+            currentSessionId = null; 
+
             currentSystemPrompt = systemPrompts[userProfile.grade];
             lastAiMessageTime = null;
             userResponseTimes = [];
@@ -435,9 +428,7 @@
             currentTopicTurn = 0; 
             sessionStartTime = new Date();
             resetActivityTracker();
-            
-            chatHeader.textContent = '새로운 책 이야기 시작!'; // [수정] 헤더 초기화
-    
+
             const lastBook = await getLastBookTitle();
             let initialGreeting = `안녕, ${userProfile.nickname}! 오늘 어떤 책을 읽었는지 책 제목을 알려줄래?`;
             if (lastBook) {
@@ -455,7 +446,7 @@
             chatInput.value = '';
             addMessageToUI('user', userInput);
             chatHistory.push({ role: 'user', parts: [{ text: userInput }] });
-    
+
             if (conversationState === 'awaiting_title') {
                 currentBookTitle = userInput;
                 conversationState = 'awaiting_summary';
@@ -463,22 +454,20 @@
                 await createNewSession(currentBookTitle);
                 await saveMessageToDb('user', userInput);
 
-                chatHeader.textContent = `『${currentBookTitle}』 이야기 중...`; // [수정] 헤더 업데이트
-    
                 const summaryRequest = "좋아! 그 책의 줄거리나 가장 기억에 남는 장면을 이야기해줄래? 😉";
                 await saveMessageToDb('model', summaryRequest);
-    
+
             } else {
                 if (lastAiMessageTime) userResponseTimes.push((new Date() - lastAiMessageTime) / 1000);
                 conversationState = 'in_progress';
                 currentTopicTurn++; 
-    
+
                 await saveMessageToDb('user', userInput);
                 await callGeminiAPI(userInput, currentTopicTurn);
                 if (currentTopicTurn >= 2) currentTopicTurn = 0; 
             }
         }
-    
+
         async function createNewSession(bookTitle) {
              const sessionData = {
                 bookTitle: bookTitle, 
@@ -489,42 +478,25 @@
             const sessionsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions`);
             const docRef = await addDoc(sessionsRef, sessionData);
             currentSessionId = docRef.id;
-            listenToChat(currentSessionId, bookTitle); // [수정] 책 제목 전달
+            listenToChat(currentSessionId);
         }
-    
-        // [수정] listenToChat 함수: 책 제목을 받아 헤더를 업데이트
-        function listenToChat(sessionId, bookTitle) {
+
+        function listenToChat(sessionId) {
             if(unsubscribeChats) unsubscribeChats();
-
-            // 현재 보고 있는 세션 ID를 전역 변수에 저장
-            currentSessionId = sessionId; 
-
-            // 새 채팅이 아니면(지난 대화 보기) 헤더를 책 제목으로 변경
-            if (bookTitle) {
-                 chatHeader.textContent = `『${bookTitle}』 대화 기록`;
-            }
-
             const chatCollectionRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions/${sessionId}/chats`);
             const q = query(chatCollectionRef, orderBy("createdAt"));
-    
+
             unsubscribeChats = onSnapshot(q, (snapshot) => {
                 chatMessages.innerHTML = '';
-                chatHistory = []; // 히스토리 초기화
-                if (snapshot.empty) {
-                    addMessageToUI('ai', '아직 이 책에 대한 대화가 없네! 무슨 이야기부터 해볼까?');
-                } else {
-                    snapshot.docs.forEach(doc => {
-                        const data = doc.data();
-                        chatHistory.push({ role: data.role, parts: [{ text: data.text }] });
-                        addMessageToUI(data.role === 'user' ? 'user' : 'ai', data.text);
-                    });
-                }
-            }, (error) => {
-                console.error("채팅 내용 불러오기 실패:", error);
-                addMessageToUI('ai', '앗, 이전 대화를 불러오는 데 문제가 생겼어. 😥');
+                chatHistory = [];
+                snapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    chatHistory.push({ role: data.role, parts: [{ text: data.text }] });
+                    addMessageToUI(data.role === 'user' ? 'user' : 'ai', data.text);
+                });
             });
         }
-    
+
         async function saveSessionData(feedback = null) {
             if (!sessionStartTime || !currentUser || !userProfile || !currentSessionId) return;
             recordActivity();
@@ -532,7 +504,7 @@
                 sessionStartTime = null; 
                 return; 
             }
-    
+
             const sessionEndTime = new Date();
             const userMessages = chatHistory.filter(m => m.role === 'user');
             const totalMessageLength = userMessages.reduce((acc, msg) => acc + msg.parts[0].text.length, 0);
@@ -541,7 +513,7 @@
             const avgResponseTime = userResponseTimes.length > 0 ? Math.round(userResponseTimes.reduce((a, b) => a + b, 0) / userResponseTimes.length) : null;
             
             const transcript = chatHistory.map(m => `${m.role === 'user' ? userProfile.nickname : '부키'}: ${m.parts[0].text}`).join('\n');
-    
+
             const sessionData = {
                 endTime: sessionEndTime,
                 activeDurationInSeconds: Math.round(totalActiveSeconds),
@@ -556,7 +528,8 @@
             try {
                 const sessionDocRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}/sessions`, currentSessionId);
                 await setDoc(sessionDocRef, sessionData, { merge: true });
-                updateUserHeader(); // 세션 저장 후 레벨이 바뀔 수 있으므로 헤더 업데이트
+                
+                // 생략: triggerSaveToSheet(sessionData); - 자동 연동 기능은 일단 제외
             } catch (error) { console.error("세션 데이터 업데이트 실패:", error); } 
             finally { sessionStartTime = null; }
         }
@@ -570,15 +543,14 @@
             if (topicTurn >= 2) {
                 finalSystemPrompt += "\n\n[중요 규칙] 이미 같은 주제에 대해 두 번 질문했습니다. 이제 대화의 흐름을 바꾸어 책의 '다른 장면', '다른 등장인물', 또는 '새로운 교훈'에 대한 질문을 해주세요. 같은 주제를 계속 파고들면 안 됩니다.";
             }
-    
+
             const payload = {
                 chatHistory,
                 userInput,
                 systemPrompt: finalSystemPrompt
             };
-    
+
             try {
-                // 이 부분은 기존과 동일하게 Netlify 함수를 호출합니다.
                 const response = await fetch('/.netlify/functions/call-gemini', {
                     method: 'POST',
                     body: JSON.stringify(payload)
@@ -597,56 +569,40 @@
                 chatInput.focus();
             }
         }
-    
-        // --- [수정] 사이드바 로직 ---
+
+        // --- 사이드바 로직 ---
         function toggleSidebar() {
             sidebar.classList.toggle('open');
             sidebarOverlay.classList.toggle('hidden');
         }
-    
-        // [수정] 사이드바에 책 제목 목록을 불러오는 함수
+
         function loadSessionsToSidebar() {
-            if (!currentUser) return;
             const sessionsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions`);
             const q = query(sessionsRef, orderBy("startTime", "desc"));
-    
+
             if (unsubscribeSessions) unsubscribeSessions();
-            
             unsubscribeSessions = onSnapshot(q, (snapshot) => {
-                sidebarContent.innerHTML = ''; // 사이드바 내용 초기화
-                if (snapshot.empty) {
-                    sidebarContent.innerHTML = '<p class="p-3 text-gray-400">아직 대화 기록이 없어요.</p>';
-                    return;
-                }
+                sidebarContent.innerHTML = '';
                 snapshot.forEach(doc => {
                     const session = doc.data();
-                    // 책 제목이 있는 세션만 목록에 표시
-                    if(!session.bookTitle) return; 
-    
+                    if(!session.bookTitle) return; // 책 제목이 없는 세션은 건너뛰기
+
                     const sessionEl = document.createElement('button');
-                    sessionEl.className = 'w-full text-left p-3 hover:bg-gray-700 rounded-md flex items-center';
-                    // 책 아이콘과 책 제목을 함께 표시
-                    sessionEl.innerHTML = `
-                        <i class="fas fa-book-open mr-3 text-gray-400 w-5 text-center"></i>
-                        <span class="truncate flex-1">${session.bookTitle}</span>
-                    `;
-                    // 버튼 클릭 시 해당 책의 대화 내용을 불러옴
+                    sessionEl.className = 'w-full text-left p-3 hover:bg-gray-700 rounded-md block truncate';
+                    sessionEl.textContent = session.bookTitle;
                     sessionEl.onclick = () => {
-                        listenToChat(doc.id, session.bookTitle);
-                        toggleSidebar(); // 사이드바 닫기
+                        listenToChat(doc.id);
+                        toggleSidebar();
                     };
                     sidebarContent.appendChild(sessionEl);
                 });
             });
         }
         
-        // 이벤트 리스너 연결
         openSidebarBtn.addEventListener('click', toggleSidebar);
         closeSidebarBtn.addEventListener('click', toggleSidebar);
         sidebarOverlay.addEventListener('click', toggleSidebar);
-        
         sidebarNewChatBtn.addEventListener('click', () => {
-            saveSessionData(); // 새로운 채팅 시작 전, 현재 채팅이 있었다면 저장
             startNewChat();
             toggleSidebar();
         });
@@ -659,7 +615,7 @@
             feedbackScreen.classList.remove('hidden'); 
             feedbackScreen.classList.add('fade-in');
         });
-    
+
         document.querySelectorAll('.feedback-btn').forEach(button => {
             button.addEventListener('click', async (e) => {
                 const feedback = e.target.dataset.feedback;
@@ -674,5 +630,4 @@
     </script>
 </body>
 </html>
-
 
