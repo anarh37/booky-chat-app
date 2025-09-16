@@ -614,7 +614,7 @@
         chatForm.addEventListener('submit', handleSendMessage);
         
         logoutBtn.addEventListener('click', () => { 
-            if(sessionStartTime && currentSessionId) saveSessionData();
+            // [수정] 피드백 전에 세션 데이터를 저장하는 로직을 제거합니다.
             mainApp.classList.add('hidden'); 
             feedbackScreen.classList.remove('hidden'); 
             feedbackScreen.classList.add('fade-in');
@@ -627,13 +627,15 @@
                 if (unsubscribeChats) unsubscribeChats();
                 if (unsubscribeSessions) unsubscribeSessions();
                 await signOut(auth);
-                // window.location.reload(); // [수정] 이 부분을 제거하여 로그아웃 후 화면이 자연스럽게 전환되도록 합니다.
+                // window.location.reload(); // 불필요한 새로고침 제거
             });
         });
         window.addEventListener('beforeunload', () => { if (sessionStartTime && currentSessionId) saveSessionData(); });
     </script>
 </body>
 </html>
+
+
 
 
 
