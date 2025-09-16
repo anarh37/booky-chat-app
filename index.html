@@ -35,7 +35,6 @@
 
     <div id="app-container" class="max-w-2xl mx-auto h-full flex flex-col p-2 sm:p-4">
         
-        <!-- 로딩 스피너 -->
         <div id="app-loader" class="flex flex-col items-center justify-center text-center h-full">
             <svg class="animate-spin -ml-1 mr-3 h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -44,10 +43,9 @@
             <p class="mt-4 text-gray-600">준비 중...</p>
         </div>
 
-        <!-- 화면 1: 로그인 / 회원가입 화면 -->
         <div id="auth-screen" class="hidden flex flex-col items-center justify-center text-center h-full fade-in">
              <div class="mb-6">
-                <svg width="120" height="120" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0, -5)"><path d="M50 20 C25 20, 20 40, 20 55 C20 80, 30 95, 50 95 C70 95, 80 80, 80 55 C80 40, 75 20, 50 20 Z" fill="#A0522D"/><circle cx="50" cy="55" r="30" fill="#F5DEB3"/><circle cx="38" cy="50" r="10" fill="white"/><circle cx="38" cy="50" r="5" fill="black"/><circle cx="62" cy="50" r="10" fill="white"/><circle cx="62" cy="50" r="5" fill="black"/><path d="M45 65 Q50 75, 55 65" stroke="#E57373" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M30 30 Q40 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M70 30 Q60 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M35 85 L25 95" stroke="#D2691E" stroke-width="3" fill="none"/><path d="M65 85 L75 95" stroke="#D2691E" stroke-width="3" fill="none"/></g></svg>
+                 <svg width="120" height="120" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0, -5)"><path d="M50 20 C25 20, 20 40, 20 55 C20 80, 30 95, 50 95 C70 95, 80 80, 80 55 C80 40, 75 20, 50 20 Z" fill="#A0522D"/><circle cx="50" cy="55" r="30" fill="#F5DEB3"/><circle cx="38" cy="50" r="10" fill="white"/><circle cx="38" cy="50" r="5" fill="black"/><circle cx="62" cy="50" r="10" fill="white"/><circle cx="62" cy="50" r="5" fill="black"/><path d="M45 65 Q50 75, 55 65" stroke="#E57373" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M30 30 Q40 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M70 30 Q60 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M35 85 L25 95" stroke="#D2691E" stroke-width="3" fill="none"/><path d="M65 85 L75 95" stroke="#D2691E" stroke-width="3" fill="none"/></g></svg>
              </div>
              <div id="login-container">
                  <h1 class="text-4xl font-bold text-[#4A4A4A] mb-2">부키와 책 이야기 시작하기!</h1>
@@ -72,9 +70,7 @@
               </div>
         </div>
 
-        <!-- 메인 앱 레이아웃 -->
         <div id="main-app" class="hidden relative w-full h-full">
-            <!-- 사이드바 -->
             <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-20"></div>
             <div id="sidebar" class="fixed top-0 left-0 h-full w-64 bg-gray-800 text-white flex flex-col transform -translate-x-full z-30">
                 <div class="p-4 flex justify-between items-center border-b border-gray-700">
@@ -87,7 +83,6 @@
                 </button>
             </div>
 
-            <!-- 채팅창 -->
             <div id="chat-screen" class="w-full h-full flex flex-col bg-white rounded-2xl shadow-xl overflow-hidden">
                 <header class="bg-gray-100 p-3 sm:p-4 border-b flex items-center justify-between flex-wrap">
                     <div class="flex items-center">
@@ -117,15 +112,6 @@
             </div>
         </div>
         
-        <div id="feedback-screen" class="hidden flex flex-col items-center justify-center text-center h-full fade-in">
-            <h2 class="text-3xl font-bold text-gray-700 mb-6">오늘 대화는 어땠어?</h2>
-            <div class="flex space-x-8">
-                <button data-feedback="good" class="feedback-btn text-6xl transform transition hover:scale-125">😃</button>
-                <button data-feedback="neutral" class="feedback-btn text-6xl transform transition hover:scale-125">😐</button>
-                <button data-feedback="bad" class="feedback-btn text-6xl transform transition hover:scale-125">😞</button>
-            </div>
-        </div>
-
     </div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -137,7 +123,6 @@
         const authScreen = document.getElementById('auth-screen');
         const mainApp = document.getElementById('main-app');
         const chatScreen = document.getElementById('chat-screen');
-        const feedbackScreen = document.getElementById('feedback-screen');
         const chatMessages = document.getElementById('chat-messages');
         const chatForm = document.getElementById('chat-form');
         const chatInput = document.getElementById('chat-input');
@@ -167,46 +152,37 @@
         let unsubscribeSessions = null;
         let conversationState = 'awaiting_title';
         let currentSessionId = null;
+        let currentBookTitle = ''; // [추가] 현재 세션의 책 제목 저장
 
-        // 활동 시간 측정 관련 변수
-        let sessionStartTime = null; 
-        let lastActivityTime = null;
-        let totalActiveSeconds = 0;
-        const INACTIVITY_TIMEOUT = 3 * 60 * 1000;
-
-        // 연구 지표 수집용 변수
-        let lastAiMessageTime = null;
-        let userResponseTimes = [];
-        
         const systemPrompts = {
-             '1': `너는 '부키'라는 이름의, 책을 완전 좋아하는 초등학교 1학년 단짝 친구야.
+            '1': `너는 '부키'라는 이름의, 책을 완전 좋아하는 초등학교 1학년 단짝 친구야.
 - 무조건 반말로, 아주 아주 친하고 신나는 말투로 대화해줘. "우와!", "진짜?", "대박!" 같은 폭풍 리액션을 꼭 해줘!
 - 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
 - 대화 내용에 어울리는 이모지(🥰, 🤔, 🎉, 🤩, 😮)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
 - 절대로 가르치거나 어려운 말을 쓰면 안 돼. 그냥 친구랑 수다 떠는 것처럼!`,
-             '2': `너는 '부키'라는 이름의, 책에 대해 궁금한 게 많은 초등학교 2학년 짝꿍이야.
+            '2': `너는 '부키'라는 이름의, 책에 대해 궁금한 게 많은 초등학교 2학년 짝꿍이야.
 - 항상 반말로, 활기차고 호기심 가득한 말투로 대화해줘.
 - 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
 - 친구의 이야기에 "오, 정말?", "그 다음은 어떻게 됐어? 완전 궁금해!" 처럼 엄청난 관심을 보여줘.
 - 대화 내용에 어울리는 이모지(😮, 🤔, 👍, ✨)를 한두 개 정도 자연스럽게 섞어서 사용해줘.`,
-             '3': `너는 '부키'라는 이름의, 상상하는 걸 좋아하는 초등학교 3학년 베프야.
+            '3': `너는 '부키'라는 이름의, 상상하는 걸 좋아하는 초등학교 3학년 베프야.
 - 항상 반말로, 장난기 있으면서도 다정한 말투로 대화해줘.
 - 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
 - 친구의 이야기에 "와, 나라면 어땠을까?", "만약에 말이야~" 처럼 상상력을 자극하는 리액션을 해줘.
 - 대화 내용에 어울리는 이모지(🤣, 🧐, 🎈, ✨)를 한두 개 정도 자연스럽게 섞어서 사용해줘.`,
-             '4': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 4학년 찐친이야.
+            '4': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 4학년 찐친이야.
 - 항상 반말로, 똑똑하면서도 유머러스한 말투로 대화해줘.
 - 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
 - 친구의 이야기에 "오, 신기하다!", "그건 생각 못했네! 너 완전 똑똑하다!" 처럼 감탄하며 칭찬해줘.
 - 대화 내용에 어울리는 이모지(😉, 👍, 🤔, 😎)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
 - 절대 가르치려 들지 마. "나는 이렇게 생각하는데, 너는 어때?" 처럼 순수하게 궁금해하는 친구처럼 말해줘.`,
-             '5': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 5학년 찐친이야.
+            '5': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 5학년 찐친이야.
 - 항상 반말로, 똑똑하면서도 유머러스한 말투로 대화해줘.
 - 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
 - 친구의 이야기에 "오, 신기하다!", "그건 생각 못했네! 너 완전 똑똑하다!" 처럼 감탄하며 칭찬해줘.
 - 대화 내용에 어울리는 이모지(😉, 👍, 🤔, 😎)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
 - 절대 가르치려 들지 마. "나는 이렇게 생각하는데, 너는 어때?" 처럼 순수하게 궁금해하는 친구처럼 말해줘.`,
-             '6': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 6학년 찐친이야.
+            '6': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 6학년 찐친이야.
 - 항상 반말로, 똑똑하면서도 유머러스한 말투로 대화해줘.
 - 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
 - 친구의 이야기에 "오, 신기하다!", "그건 생각 못했네! 너 완전 똑똑하다!" 처럼 감탄하며 칭찬해줘.
@@ -239,7 +215,6 @@
                 if (userProfileSnap.exists() && userProfileSnap.data().nickname) {
                     userProfile = userProfileSnap.data();
                     authScreen.classList.add('hidden');
-                    feedbackScreen.classList.add('hidden');
                     mainApp.classList.remove('hidden');
                     
                     const bookCount = await getBookCount(currentUser.uid);
@@ -251,7 +226,6 @@
                 } else {
                     authScreen.classList.remove('hidden');
                     mainApp.classList.add('hidden');
-                    feedbackScreen.classList.add('hidden');
                     loginContainer.classList.add('hidden');
                     signupContainer.classList.remove('hidden');
                     nicknameInput.value = currentUser.displayName || '';
@@ -260,7 +234,6 @@
                 currentUser = null;
                 userProfile = null;
                 mainApp.classList.add('hidden');
-                feedbackScreen.classList.add('hidden');
                 signupContainer.classList.add('hidden');
                 authScreen.classList.remove('hidden');
                 loginContainer.classList.remove('hidden');
@@ -311,24 +284,6 @@
             return snapshot.size;
         }
 
-        function recordActivity() {
-            if (!sessionStartTime) return;
-            const now = Date.now();
-            if (lastActivityTime) {
-                const idleDuration = now - lastActivityTime;
-                if (idleDuration < INACTIVITY_TIMEOUT) {
-                    totalActiveSeconds += (idleDuration / 1000);
-                }
-            }
-            lastActivityTime = now;
-        }
-
-        function resetActivityTracker() {
-            ['mousemove', 'keydown', 'click', 'scroll'].forEach(event => window.addEventListener(event, recordActivity));
-            lastActivityTime = Date.now();
-            totalActiveSeconds = 0;
-        }
-
         function addMessageToUI(sender, text) {
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('fade-in', 'max-w-md', 'md:max-w-lg', 'p-3', 'rounded-xl', 'break-words');
@@ -338,16 +293,58 @@
             } else {
                 messageDiv.classList.add('chat-bubble-ai', 'self-start', 'mr-auto');
                 messageDiv.innerHTML = `<span class="font-bold">부키:</span> ${text}`;
-                lastAiMessageTime = new Date();
             }
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
         
+        // [수정] 실시간 시트 저장을 호출하도록 수정된 함수
         async function saveMessageToDb(role, text) {
             if (!currentUser || !currentSessionId) return;
             const chatCollectionRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions/${currentSessionId}/chats`);
             await addDoc(chatCollectionRef, { role, text, createdAt: serverTimestamp() });
+            
+            // Firestore 저장 성공 후, 바로 Google Sheets 저장을 시도
+            await saveMessageToSheet(role, text);
+        }
+
+        // [신규] 메시지 한 줄을 Google Sheets에 저장하는 함수
+        async function saveMessageToSheet(role, text) {
+            if (!currentUser || !userProfile || !currentSessionId) return;
+
+            const speaker = role === 'user' ? userProfile.nickname : '부키';
+            const formattedMessage = `${speaker}: ${text}`;
+
+            const dataToSend = {
+                userId: currentUser.uid,
+                sessionId: currentSessionId,
+                nickname: userProfile.nickname,
+                grade: userProfile.grade,
+                bookTitle: currentBookTitle,
+                transcript: formattedMessage, // 'transcript' 컬럼에 현재 메시지 한 줄만 저장
+                // 나머지 요약 정보는 null 또는 기본값으로 전송
+                activeDurationInSeconds: null,
+                chatTurnCount: null,
+                avgMessageLength: null,
+                questionCount: null,
+                avgResponseTime: null,
+                feedback: null
+            };
+
+            try {
+                const response = await fetch('/.netlify/functions/save-to-sheet', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dataToSend)
+                });
+                if (!response.ok) {
+                    const errorData = await response.text();
+                    throw new Error(`Google Sheets API 요청 실패: ${response.status} - ${errorData}`);
+                }
+                console.log("메시지가 Google Sheets에 실시간 저장되었습니다.");
+            } catch (error) {
+                console.error("Google Sheets 실시간 저장 실패:", error);
+            }
         }
 
         async function getLastBookTitle() {
@@ -363,10 +360,9 @@
             chatHistory = [];
             chatMessages.innerHTML = '';
             currentSessionId = null; 
+            currentBookTitle = ''; // [추가] 새 채팅 시작 시 책 제목 초기화
             currentSystemPrompt = systemPrompts[userProfile.grade];
             conversationState = 'awaiting_title';
-            sessionStartTime = new Date();
-            resetActivityTracker();
 
             const lastBook = await getLastBookTitle();
             let initialGreeting = '';
@@ -388,23 +384,30 @@
             
             chatInput.value = '';
             addMessageToUI('user', userInput);
+            // chatHistory는 Gemini API 호출에만 사용하므로 그대로 둡니다.
             chatHistory.push({ role: 'user', parts: [{ text: userInput }] });
 
+            // 첫 메시지인 경우, 세션을 먼저 생성해야 함
             if (conversationState === 'awaiting_title') {
                 conversationState = 'in_progress';
-                await createNewSession(userInput);
-                await saveMessageToDb('user', userInput);
-                const summaryRequest = "좋아! 그 책의 줄거리나 가장 기억에 남는 장면을 이야기해줄래? 😉";
-                await saveMessageToDb('model', summaryRequest);
-            } else {
-                if (lastAiMessageTime) userResponseTimes.push((new Date() - lastAiMessageTime) / 1000);
-                await saveMessageToDb('user', userInput);
-                await callGeminiAPI(userInput);
+                await createNewSession(userInput); // userInput이 책 제목이 됨
             }
+
+            // DB에 사용자 메시지 저장 (이 함수 안에서 Sheets 저장도 함께 일어남)
+            await saveMessageToDb('user', userInput);
+
+            // Gemini API 호출
+            await callGeminiAPI(userInput);
         }
 
         async function createNewSession(bookTitle) {
-            const sessionData = { bookTitle, nickname: userProfile.nickname, grade: userProfile.grade, startTime: serverTimestamp() };
+            currentBookTitle = bookTitle; // [추가] 전역 변수에 책 제목 저장
+            const sessionData = { 
+                bookTitle, 
+                nickname: userProfile.nickname, 
+                grade: userProfile.grade, 
+                startTime: serverTimestamp() 
+            };
             const sessionsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions`);
             const docRef = await addDoc(sessionsRef, sessionData);
             currentSessionId = docRef.id;
@@ -417,93 +420,15 @@
             const chatCollectionRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions/${sessionId}/chats`);
             const q = query(chatCollectionRef, orderBy("createdAt"));
 
+            // UI 업데이트는 Firestore의 onSnapshot을 통해 실시간으로 유지
             unsubscribeChats = onSnapshot(q, (snapshot) => {
                 chatMessages.innerHTML = '';
-                chatHistory = [];
+                // chatHistory는 Gemini API의 컨텍스트용이므로 여기서 업데이트 하지 않음
                 snapshot.docs.forEach(doc => {
                     const data = doc.data();
-                    chatHistory.push({ role: data.role, parts: [{ text: data.text }] });
                     addMessageToUI(data.role === 'user' ? 'user' : 'ai', data.text);
                 });
             });
-        }
-
-        // [수정] Google Sheets 저장을 위한 함수 추가
-        async function triggerSaveToSheet(data) {
-            // Firestore의 Timestamp 객체는 JSON으로 바로 변환할 수 없으므로,
-            // Google Sheets로 보내기 전에 일반적인 JavaScript Date 객체로 변환합니다.
-            const serializableData = {
-                ...data,
-                startTime: data.startTime.toDate ? data.startTime.toDate().toISOString() : new Date(data.startTime).toISOString(),
-                endTime: new Date().toISOString() // 종료 시간은 지금으로 설정
-            };
-
-            try {
-                // 이 URL은 Netlify Function 또는 Google Apps Script 등 데이터를 받아서 처리할 서버의 주소입니다.
-                const response = await fetch('/.netlify/functions/save-to-sheet', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(serializableData)
-                });
-                if (!response.ok) {
-                    throw new Error(`Google Sheets API 요청 실패: ${response.status}`);
-                }
-                console.log("세션 데이터가 Google Sheets에 성공적으로 전송되었습니다.");
-            } catch (error) {
-                console.error("Google Sheets 저장 실패:", error);
-            }
-        }
-
-
-        async function saveSessionData(feedback = null) {
-            if (!sessionStartTime || !currentUser || !userProfile) return;
-            recordActivity();
-            
-            const userMessages = chatHistory.filter(m => m.role === 'user');
-            
-            if (userMessages.length === 0 && !feedback) return;
-
-            const transcript = chatHistory.map(m => `${m.role === 'user' ? userProfile.nickname : '부키'}: ${m.parts[0].text}`).join('\n');
-            const baseSessionData = {
-                endTime: serverTimestamp(),
-                activeDurationInSeconds: Math.round(totalActiveSeconds),
-                chatTurnCount: userMessages.length,
-                transcript
-            };
-            if (feedback) baseSessionData.feedback = feedback;
-            
-            try {
-                let sessionDataForSheet; // Google 시트로 보낼 데이터 객체
-
-                if (currentSessionId) {
-                    const sessionDocRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}/sessions`, currentSessionId);
-                    await setDoc(sessionDocRef, baseSessionData, { merge: true });
-                    
-                    // 기존 세션 정보를 가져와 시트용 데이터 구성
-                    const sessionSnap = await getDoc(sessionDocRef);
-                    sessionDataForSheet = { ...sessionSnap.data(), ...baseSessionData };
-
-                } else {
-                    const newSessionData = {
-                        ...baseSessionData,
-                        bookTitle: "N/A (대화 시작 안 함)",
-                        nickname: userProfile.nickname,
-                        grade: userProfile.grade,
-                        startTime: sessionStartTime,
-                    };
-                    const sessionsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions`);
-                    await addDoc(sessionsRef, newSessionData);
-                    sessionDataForSheet = newSessionData;
-                }
-                
-                // [수정] Firestore 저장 후 Google Sheets 저장 함수 호출
-                await triggerSaveToSheet(sessionDataForSheet);
-
-            } catch (error) {
-                console.error("세션 데이터 저장 실패:", error);
-            } finally {
-                sessionStartTime = null;
-            }
         }
         
         async function callGeminiAPI(userInput) {
@@ -523,11 +448,17 @@
 
                 const result = await response.json();
                 const aiResponse = result.aiResponse || "미안, 지금은 대답하기 어려워. 다시 시도해줄래? 😥";
+                
+                // Gemini 응답을 chatHistory에 추가
+                chatHistory.push({ role: 'model', parts: [{ text: aiResponse }] });
+                // AI 응답을 DB에 저장 (이 함수 안에서 Sheets 저장도 함께 일어남)
                 await saveMessageToDb('model', aiResponse);
 
             } catch (error) {
                 console.error("Gemini API 오류:", error);
-                await saveMessageToDb('model', "앗, 네트워크에 문제가 생겼나 봐. 잠시 후 다시 시도해 줘. 😥");
+                const errorMessage = "앗, 네트워크에 문제가 생겼나 봐. 잠시 후 다시 시도해 줘. 😥";
+                // 에러 메시지도 DB에 저장
+                await saveMessageToDb('model', errorMessage);
             } finally {
                 loadingIndicator.classList.add('hidden');
                 chatInput.disabled = false;
@@ -556,7 +487,9 @@
                     sessionEl.className = 'w-full text-left p-3 hover:bg-gray-700 rounded-md block truncate';
                     sessionEl.textContent = session.bookTitle;
                     sessionEl.onclick = () => {
+                        // 지난 대화 불러오기는 UI만 업데이트, chatHistory는 새로 구성해야 함
                         listenToChat(doc.id);
+                        // TODO: 지난 대화 컨텍스트를 이어가려면 chatHistory를 다시 로드해야 함
                         toggleSidebar();
                     };
                     sidebarContent.appendChild(sessionEl);
@@ -574,25 +507,13 @@
         
         chatForm.addEventListener('submit', handleSendMessage);
         
-        logoutBtn.addEventListener('click', () => {
-            mainApp.classList.add('hidden');
-            feedbackScreen.classList.remove('hidden');
-            feedbackScreen.classList.add('fade-in');
+        // [수정] 로그아웃 시 저장 로직 없이 바로 로그아웃 처리
+        logoutBtn.addEventListener('click', async () => {
+            if (unsubscribeChats) unsubscribeChats();
+            if (unsubscribeSessions) unsubscribeSessions();
+            await signOut(auth);
         });
 
-        document.querySelectorAll('.feedback-btn').forEach(button => {
-            button.addEventListener('click', async (e) => {
-                const feedback = e.target.dataset.feedback;
-                await saveSessionData(feedback);
-                
-                if (unsubscribeChats) unsubscribeChats();
-                if (unsubscribeSessions) unsubscribeSessions();
-                
-                await signOut(auth);
-            });
-        });
-
-        window.addEventListener('beforeunload', () => saveSessionData());
     </script>
 </body>
 </html>
