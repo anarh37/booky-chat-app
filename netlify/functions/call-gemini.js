@@ -1,6 +1,6 @@
 // API 키를 Netlify 환경 변수에서 안전하게 가져옵니다.
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${GEMINI_API_KEY}`;
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
