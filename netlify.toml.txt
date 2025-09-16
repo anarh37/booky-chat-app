@@ -1,4 +1,2 @@
-# 이 파일은 Netlify에게 우리 서버 코드가 어디 있는지 알려주는 역할을 합니다.
 [functions]
-  directory = "netlify/functions/"
-
+directory = "netlify/functions/"
