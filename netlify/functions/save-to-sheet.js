@@ -19,12 +19,9 @@ exports.handler = async (event) => {
     });
     const sheets = google.sheets({ version: 'v4', auth });
 
-    // 시트에 추가할 데이터 행 준비
-    const now = new Date();
-    const formattedDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    
+    // 시트에 추가할 데이터 행 준비 (Transcript 포함)
     const newRow = [
-        formattedDate,
+        new Date().toLocaleString("ko-KR", {timeZone: "Asia/Seoul"}),
         sessionData.userId || '',
         sessionData.sessionId || '',
         sessionData.nickname || '',
@@ -35,7 +32,8 @@ exports.handler = async (event) => {
         sessionData.avgMessageLength || 0,
         sessionData.questionCount || 0,
         sessionData.avgResponseTime || null,
-        sessionData.feedback || ''
+        sessionData.feedback || '',
+        sessionData.transcript || '' // 전체 대화 기록
     ];
 
     // 시트에 데이터 추가
