@@ -371,12 +371,9 @@
             const lastBook = await getLastBookTitle();
             let initialGreeting = '';
             
-            // [수정] 신규 사용자와 기존 사용자의 첫인사를 분리합니다.
             if (lastBook && lastBook !== "N/A (대화 시작 안 함)") {
-                // 이전 대화 기록이 있는 사용자
                 initialGreeting = `안녕, ${userProfile.nickname}! 우리 지난번에 『${lastBook}』에 대해 이야기 나눠서 정말 즐거웠어. 오늘은 어떤 새로운 책을 읽었는지 알려줄래?`;
             } else {
-                // 완전히 처음 사용하는 신규 사용자
                 initialGreeting = `반가워, ${userProfile.nickname}! 나는 책을 좋아하는 부키야. 우리 같이 재미있는 책 이야기 해볼까? 오늘 어떤 책을 읽었는지 알려줘!`;
             }
             
@@ -431,15 +428,40 @@
             });
         }
 
+        // [수정] Google Sheets 저장을 위한 함수 추가
+        async function triggerSaveToSheet(data) {
+            // Firestore의 Timestamp 객체는 JSON으로 바로 변환할 수 없으므로,
+            // Google Sheets로 보내기 전에 일반적인 JavaScript Date 객체로 변환합니다.
+            const serializableData = {
+                ...data,
+                startTime: data.startTime.toDate ? data.startTime.toDate().toISOString() : new Date(data.startTime).toISOString(),
+                endTime: new Date().toISOString() // 종료 시간은 지금으로 설정
+            };
+
+            try {
+                // 이 URL은 Netlify Function 또는 Google Apps Script 등 데이터를 받아서 처리할 서버의 주소입니다.
+                const response = await fetch('/.netlify/functions/save-to-sheet', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(serializableData)
+                });
+                if (!response.ok) {
+                    throw new Error(`Google Sheets API 요청 실패: ${response.status}`);
+                }
+                console.log("세션 데이터가 Google Sheets에 성공적으로 전송되었습니다.");
+            } catch (error) {
+                console.error("Google Sheets 저장 실패:", error);
+            }
+        }
+
+
         async function saveSessionData(feedback = null) {
             if (!sessionStartTime || !currentUser || !userProfile) return;
             recordActivity();
             
             const userMessages = chatHistory.filter(m => m.role === 'user');
             
-            if (userMessages.length === 0 && !feedback) {
-                return;
-            }
+            if (userMessages.length === 0 && !feedback) return;
 
             const transcript = chatHistory.map(m => `${m.role === 'user' ? userProfile.nickname : '부키'}: ${m.parts[0].text}`).join('\n');
             const baseSessionData = {
@@ -448,14 +470,19 @@
                 chatTurnCount: userMessages.length,
                 transcript
             };
-            if (feedback) {
-                baseSessionData.feedback = feedback;
-            }
+            if (feedback) baseSessionData.feedback = feedback;
             
             try {
+                let sessionDataForSheet; // Google 시트로 보낼 데이터 객체
+
                 if (currentSessionId) {
                     const sessionDocRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}/sessions`, currentSessionId);
                     await setDoc(sessionDocRef, baseSessionData, { merge: true });
+                    
+                    // 기존 세션 정보를 가져와 시트용 데이터 구성
+                    const sessionSnap = await getDoc(sessionDocRef);
+                    sessionDataForSheet = { ...sessionSnap.data(), ...baseSessionData };
+
                 } else {
                     const newSessionData = {
                         ...baseSessionData,
@@ -466,7 +493,12 @@
                     };
                     const sessionsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions`);
                     await addDoc(sessionsRef, newSessionData);
+                    sessionDataForSheet = newSessionData;
                 }
+                
+                // [수정] Firestore 저장 후 Google Sheets 저장 함수 호출
+                await triggerSaveToSheet(sessionDataForSheet);
+
             } catch (error) {
                 console.error("세션 데이터 저장 실패:", error);
             } finally {
@@ -482,15 +514,20 @@
             const payload = { chatHistory, userInput, systemPrompt: currentSystemPrompt };
 
             try {
-                // This is a placeholder for your actual API call logic
-                console.log("Calling Gemini API with payload:", payload);
-                // Mock response for demonstration
-                const aiResponse = `"${userInput}"라고? 정말 흥미로운데! 그 부분에 대해서 더 자세히 이야기해 줄 수 있어?`;
+                const response = await fetch('/.netlify/functions/call-gemini', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error(`API 요청 실패: ${response.status}`);
+
+                const result = await response.json();
+                const aiResponse = result.aiResponse || "미안, 지금은 대답하기 어려워. 다시 시도해줄래? 😥";
                 await saveMessageToDb('model', aiResponse);
 
             } catch (error) {
-                console.error("API Error:", error);
-                await saveMessageToDb('model', "앗, 지금은 대답하기가 조금 어려워. 잠시 후에 다시 시도해 줄래?");
+                console.error("Gemini API 오류:", error);
+                await saveMessageToDb('model', "앗, 네트워크에 문제가 생겼나 봐. 잠시 후 다시 시도해 줘. 😥");
             } finally {
                 loadingIndicator.classList.add('hidden');
                 chatInput.disabled = false;
@@ -559,4 +596,6 @@
     </script>
 </body>
 </html>
+
+
 
