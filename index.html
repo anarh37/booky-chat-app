@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+        html, body {
+            height: 100%;
+            overflow: hidden; /* 모바일에서 화면이 불필요하게 스크롤되는 현상 방지 */
+        }
         body {
             font-family: 'Jua', sans-serif;
         }
@@ -51,9 +55,9 @@
         }
     </style>
 </head>
-<body class="bg-[#F0F4F8] overflow-hidden">
+<body class="bg-[#F0F4F8]">
 
-    <div id="app-container" class="max-w-2xl mx-auto h-screen flex flex-col p-2 sm:p-4">
+    <div id="app-container" class="max-w-2xl mx-auto h-full flex flex-col p-2 sm:p-4">
         
         <!-- 로딩 스피너 -->
         <div id="app-loader" class="flex flex-col items-center justify-center text-center h-full">
@@ -97,7 +101,7 @@
              </div>
         </div>
 
-        <!-- [수정] 메인 앱 레이아웃 (사이드바 + 채팅창) -->
+        <!-- 메인 앱 레이아웃 -->
         <div id="main-app" class="hidden relative w-full h-full">
             <!-- 사이드바 -->
             <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-20"></div>
@@ -120,40 +124,40 @@
                     <div class="flex items-center">
                         <button id="open-sidebar-btn" class="mr-3 text-xl text-gray-600 hover:text-black"><i class="fas fa-bars"></i></button>
                         <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="mr-3"><g transform="translate(0, -5)"><path d="M50 20 C25 20, 20 40, 20 55 C20 80, 30 95, 50 95 C70 95, 80 80, 80 55 C80 40, 75 20, 50 20 Z" fill="#A0522D"/><circle cx="50" cy="55" r="30" fill="#F5DEB3"/><circle cx="38" cy="50" r="10" fill="white"/><circle cx="38" cy="50" r="5" fill="black"/><circle cx="62" cy="50" r="10" fill="white"/><circle cx="62" cy="50" r="5" fill="black"/><path d="M45 65 Q50 75, 55 65" stroke="#E57373" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M30 30 Q40 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M70 30 Q60 20, 50 25" stroke="#A0522D" stroke-width="4" fill="none"/><path d="M35 85 L25 95" stroke="#D2691E" stroke-width="3" fill="none"/><path d="M65 85 L75 95" stroke="#D2691E" stroke-width="3" fill="none"/></g></svg>
-                    <h2 id="chat-header" class="text-lg sm:text-xl font-bold text-gray-700"></h2>
+                        <h2 id="chat-header" class="text-lg sm:text-xl font-bold text-gray-700"></h2>
+                    </div>
+                    <div class="flex items-center space-x-2 mt-2 sm:mt-0">
+                        <button id="logout-btn" class="text-xs sm:text-sm bg-red-100 hover:bg-red-200 text-red-700 font-semibold py-2 px-3 rounded-lg transition">
+                            <i class="fas fa-sign-out-alt mr-1"></i> 로그아웃
+                        </button>
+                    </div>
+                </header>
+                <main id="chat-messages" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4"></main>
+                <div id="loading-indicator" class="hidden p-4 sm:p-6 flex items-center space-x-2">
+                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
+                    <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
+                    <span class="text-sm text-gray-500">부키가 생각 중...</span>
                 </div>
-                <div class="flex items-center space-x-2 mt-2 sm:mt-0">
-                    <button id="logout-btn" class="text-xs sm:text-sm bg-red-100 hover:bg-red-200 text-red-700 font-semibold py-2 px-3 rounded-lg transition">
-                        <i class="fas fa-sign-out-alt mr-1"></i> 로그아웃
-                    </button>
-                </div>
-            </header>
-            <main id="chat-messages" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4"></main>
-            <div id="loading-indicator" class="hidden p-4 sm:p-6 flex items-center space-x-2">
-                <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
-                <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.2s;"></div>
-                <div class="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style="animation-delay: 0.4s;"></div>
-                <span class="text-sm text-gray-500">부키가 생각 중...</span>
+                <footer class="p-2 sm:p-4 border-t bg-gray-50">
+                    <form id="chat-form" class="flex items-center space-x-2 sm:space-x-3">
+                        <input id="chat-input" type="text" placeholder="여기에 너의 생각을 입력해봐!" class="flex-1 p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400" autocomplete="off">
+                        <button id="send-btn" type="submit" class="bg-blue-500 hover:bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl transition transform hover:scale-110"><i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </footer>
             </div>
-            <footer class="p-2 sm:p-4 border-t bg-gray-50">
-                <form id="chat-form" class="flex items-center space-x-2 sm:space-x-3">
-                    <input id="chat-input" type="text" placeholder="여기에 너의 생각을 입력해봐!" class="flex-1 p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400" autocomplete="off">
-                    <button id="send-btn" type="submit" class="bg-blue-500 hover:bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center text-2xl transition transform hover:scale-110"><i class="fas fa-paper-plane"></i></button>
-                </form>
-            </footer>
-        </div>
-        
-        <!-- 화면 3: 만족도 평가 -->
-        <div id="feedback-screen" class="hidden flex flex-col items-center justify-center text-center h-full fade-in">
-            <h2 class="text-3xl font-bold text-gray-700 mb-6">오늘 대화는 어땠어?</h2>
-            <div class="flex space-x-8">
-                <button data-feedback="good" class="feedback-btn text-6xl transform transition hover:scale-125">😃</button>
-                <button data-feedback="neutral" class="feedback-btn text-6xl transform transition hover:scale-125">😐</button>
-                <button data-feedback="bad" class="feedback-btn text-6xl transform transition hover:scale-125">😞</button>
+            
+            <!-- 화면 3: 만족도 평가 -->
+            <div id="feedback-screen" class="hidden flex flex-col items-center justify-center text-center h-full fade-in">
+                <h2 class="text-3xl font-bold text-gray-700 mb-6">오늘 대화는 어땠어?</h2>
+                <div class="flex space-x-8">
+                    <button data-feedback="good" class="feedback-btn text-6xl transform transition hover:scale-125">😃</button>
+                    <button data-feedback="neutral" class="feedback-btn text-6xl transform transition hover:scale-125">😐</button>
+                    <button data-feedback="bad" class="feedback-btn text-6xl transform transition hover:scale-125">😞</button>
+                </div>
             </div>
         </div>
     </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -630,4 +634,5 @@
     </script>
 </body>
 </html>
+
 
