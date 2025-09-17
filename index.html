@@ -311,7 +311,8 @@
         loadingIndicator.classList.remove('hidden');
         chatInput.disabled = true;
         sendBtn.disabled = true;
-
+        
+        const cleanedChatHistory = chatHistory.map(({ role, parts }) => ({ role, parts }));
         const payload = { chatHistory, userInput, systemPrompt: currentSystemPrompt };
 
         try {
@@ -499,6 +500,7 @@
 </script>
 </body>
 </html>
+
 
 
 
