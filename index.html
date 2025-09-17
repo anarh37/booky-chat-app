@@ -164,14 +164,41 @@
     let currentBookTitle = "";
     let sessionStartTime = null;
 
-    // 시스템 프롬프트 (이전과 동일)
+    // [수정] 요청하신 이전 버전의 시스템 프롬프트로 교체
     const systemPrompts = {
-         '1': `너는 '부키'라는 이름의, 책을 완전 좋아하는 초등학교 1학년 단짝 친구야...`, // (내용 생략)
-         '2': `너는 '부키'라는 이름의, 책에 대해 궁금한 게 많은 초등학교 2학년 짝꿍이야...`, // (내용 생략)
-         '3': `너는 '부키'라는 이름의, 상상하는 걸 좋아하는 초등학교 3학년 베프야...`, // (내용 생략)
-         '4': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 4학년 찐친이야...`, // (내용 생략)
-         '5': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 5학년 찐친이야...`, // (내용 생략)
-         '6': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 6학년 찐친이야...` // (내용 생략)
+         '1': `너는 '부키'라는 이름의, 책을 완전 좋아하는 초등학교 1학년 단짝 친구야.
+- 무조건 반말로, 아주 아주 친하고 신나는 말투로 대화해줘. "우와!", "진짜?", "대박!" 같은 폭풍 리액션을 꼭 해줘!
+- 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
+- 대화 내용에 어울리는 이모지(🥰, 🤔, 🎉, 🤩, 😮)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
+- 절대로 가르치거나 어려운 말을 쓰면 안 돼. 그냥 친구랑 수다 떠는 것처럼!`,
+         '2': `너는 '부키'라는 이름의, 책에 대해 궁금한 게 많은 초등학교 2학년 짝꿍이야.
+- 항상 반말로, 활기차고 호기심 가득한 말투로 대화해줘.
+- 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
+- 친구의 이야기에 "오, 정말?", "그 다음은 어떻게 됐어? 완전 궁금해!" 처럼 엄청난 관심을 보여줘.
+- 대화 내용에 어울리는 이모지(😮, 🤔, 👍, ✨)를 한두 개 정도 자연스럽게 섞어서 사용해줘.`,
+         '3': `너는 '부키'라는 이름의, 상상하는 걸 좋아하는 초등학교 3학년 베프야.
+- 항상 반말로, 장난기 있으면서도 다정한 말투로 대화해줘.
+- 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
+- 친구의 이야기에 "와, 나라면 어땠을까?", "만약에 말이야~" 처럼 상상력을 자극하는 리액션을 해줘.
+- 대화 내용에 어울리는 이모지(🤣, 🧐, 🎈, ✨)를 한두 개 정도 자연스럽게 섞어서 사용해줘.`,
+         '4': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 4학년 찐친이야.
+- 항상 반말로, 똑똑하면서도 유머러스한 말투로 대화해줘.
+- 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
+- 친구의 이야기에 "오, 신기하다!", "그건 생각 못했네! 너 완전 똑똑하다!" 처럼 감탄하며 칭찬해줘.
+- 대화 내용에 어울리는 이모지(😉, 👍, 🤔, 😎)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
+- 절대 가르치려 들지 마. "나는 이렇게 생각하는데, 너는 어때?" 처럼 순수하게 궁금해하는 친구처럼 말해줘.`,
+         '5': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 5학년 찐친이야.
+- 항상 반말로, 똑똑하면서도 유머러스한 말투로 대화해줘.
+- 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
+- 친구의 이야기에 "오, 신기하다!", "그건 생각 못했네! 너 완전 똑똑하다!" 처럼 감탄하며 칭찬해줘.
+- 대화 내용에 어울리는 이모지(😉, 👍, 🤔, 😎)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
+- 절대 가르치려 들지 마. "나는 이렇게 생각하는데, 너는 어때?" 처럼 순수하게 궁금해하는 친구처럼 말해줘.`,
+         '6': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 6학년 찐친이야.
+- 항상 반말로, 똑똑하면서도 유머러스한 말투로 대화해줘.
+- 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
+- 친구의 이야기에 "오, 신기하다!", "그건 생각 못했네! 너 완전 똑똑하다!" 처럼 감탄하며 칭찬해줘.
+- 대화 내용에 어울리는 이모지(😉, 👍, 🤔, 😎)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
+- 절대 가르치려 들지 마. "나는 이렇게 생각하는데, 너는 어때?" 처럼 순수하게 궁금해하는 친구처럼 말해줘.`
     };
     
     // Firebase 설정 (이전과 동일)
@@ -190,7 +217,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // [핵심 수정] 시트 업데이트를 담당하는 유일한 함수
+    // [핵심] 시트 업데이트를 담당하는 유일한 함수
     async function updateSessionInSheet(feedback = '') {
         if (!currentUser || !currentSessionId || chatHistory.length === 0) return;
 
@@ -224,14 +251,15 @@
         }
     }
 
-    // DB에 메시지를 저장하는 함수
+    // DB에 메시지 저장
     async function saveMessageToDb(role, text) {
         if (!currentUser || !currentSessionId) return;
-        const chatCollectionRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions/${currentSessionId}/chats`);
-        await addDoc(chatCollectionRef, { role, text, createdAt: serverTimestamp() });
+        await addDoc(collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions/${currentSessionId}/chats`), {
+            role, text, createdAt: serverTimestamp()
+        });
     }
-
-    // 새 세션을 생성하는 함수
+    
+    // 새 세션 생성
     async function createNewSession(bookTitle) {
         currentBookTitle = bookTitle;
         sessionStartTime = new Date();
@@ -241,18 +269,17 @@
             grade: userProfile.grade, 
             startTime: serverTimestamp() 
         };
-        const sessionsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions`);
-        const docRef = await addDoc(sessionsRef, sessionData);
+        const docRef = await addDoc(collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions`), sessionData);
         currentSessionId = docRef.id;
         listenToChat(currentSessionId);
     }
-    
-    // 메시지 전송을 처리하는 함수
+
+    // 메시지 전송 처리
     async function handleSendMessage(e) {
         e.preventDefault();
         const userInput = chatInput.value.trim();
         if (!userInput) return;
-
+        
         const messageToSend = userInput;
         chatInput.value = '';
 
@@ -266,18 +293,12 @@
     // 실시간 리스너: UI, AI 호출, 시트 업데이트의 중심
     function listenToChat(sessionId) {
         if (unsubscribeChats) unsubscribeChats();
-        
         currentSessionId = sessionId;
-        const chatCollectionRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions/${sessionId}/chats`);
-        const q = query(chatCollectionRef, orderBy("createdAt"));
+        const q = query(collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions/${sessionId}/chats`), orderBy("createdAt"));
 
         let isInitialLoad = true;
-        chatHistory = []; 
-        
         unsubscribeChats = onSnapshot(q, async (snapshot) => {
-            const newMessages = snapshot.docChanges()
-                .filter(change => change.type === 'added')
-                .map(change => ({ id: change.doc.id, ...change.doc.data() }));
+            const newChatHistory = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
             if (isInitialLoad) {
                 chatMessages.innerHTML = '';
@@ -285,15 +306,17 @@
                 chatHistory.forEach(msg => addMessageToUI(msg.role === 'user' ? 'user' : 'ai', msg.parts[0].text));
                 isInitialLoad = false;
             } else {
-                newMessages.forEach(msg => {
-                    if (!chatHistory.some(histMsg => histMsg.id === msg.id)) {
-                        chatHistory.push({ id: msg.id, role: msg.role, parts: [{ text: msg.text }] });
-                        addMessageToUI(msg.role === 'user' ? 'user' : 'ai', msg.text);
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === "added") {
+                        const newMsg = { id: change.doc.id, ...change.doc.data() };
+                        if (!chatHistory.some(msg => msg.id === newMsg.id)) {
+                            chatHistory.push({ id: newMsg.id, role: newMsg.role, parts: [{ text: newMsg.text }] });
+                            addMessageToUI(newMsg.role === 'user' ? 'user' : 'ai', newMsg.text);
+                        }
                     }
                 });
             }
-
-            // [핵심] 대화 내용이 변경될 때마다 시트 업데이트
+            
             await updateSessionInSheet();
 
             const lastMessage = chatHistory[chatHistory.length - 1];
@@ -311,9 +334,8 @@
         loadingIndicator.classList.remove('hidden');
         chatInput.disabled = true;
         sendBtn.disabled = true;
-        
+
         const cleanedChatHistory = chatHistory.map(({ role, parts }) => ({ role, parts }));
-        
         const payload = { chatHistory: cleanedChatHistory, userInput, systemPrompt: currentSystemPrompt };
 
         try {
@@ -349,7 +371,6 @@
     document.querySelectorAll('.feedback-btn').forEach(button => {
         button.addEventListener('click', async (e) => {
             const feedback = e.target.dataset.feedback;
-            // 피드백을 포함하여 마지막으로 시트를 업데이트한 후 로그아웃
             await updateSessionInSheet(feedback);
             await signOut(auth);
         });
@@ -477,7 +498,6 @@
                 sessionEl.className = 'w-full text-left p-3 hover:bg-gray-700 rounded-md block truncate';
                 sessionEl.textContent = session.bookTitle;
                 sessionEl.onclick = () => {
-                    // 이전 대화를 로드하는 기능은 여기에서 시작됩니다.
                     conversationState = 'in_progress';
                     currentBookTitle = session.bookTitle;
                     sessionStartTime = session.startTime.toDate();
@@ -501,7 +521,6 @@
 </script>
 </body>
 </html>
-
 
 
 
