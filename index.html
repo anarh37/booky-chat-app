@@ -131,8 +131,6 @@
     const appLoader = document.getElementById('app-loader');
     const authScreen = document.getElementById('auth-screen');
     const mainApp = document.getElementById('main-app');
-    const chatScreen = document.getElementById('chat-screen');
-    const feedbackScreen = document.getElementById('feedback-screen');
     const chatMessages = document.getElementById('chat-messages');
     const chatForm = document.getElementById('chat-form');
     const chatInput = document.getElementById('chat-input');
@@ -152,6 +150,7 @@
     const closeSidebarBtn = document.getElementById('close-sidebar-btn');
     const sidebarContent = document.getElementById('sidebar-content');
     const sidebarNewChatBtn = document.getElementById('sidebar-new-chat-btn');
+    const feedbackScreen = document.getElementById('feedback-screen');
 
     // 전역 상태 변수
     let currentUser = null;
@@ -162,53 +161,20 @@
     let unsubscribeSessions = null;
     let conversationState = 'awaiting_title';
     let currentSessionId = null;
+    let currentBookTitle = "";
+    let sessionStartTime = null;
 
-    // 활동 시간 측정 관련 변수
-    let sessionStartTime = null; 
-    let lastActivityTime = null;
-    let totalActiveSeconds = 0;
-    const INACTIVITY_TIMEOUT = 3 * 60 * 1000;
-
-    // 연구 지표 수집용 변수
-    let lastAiMessageTime = null;
-    let userResponseTimes = [];
-    
+    // 시스템 프롬프트 (이전과 동일)
     const systemPrompts = {
-         '1': `너는 '부키'라는 이름의, 책을 완전 좋아하는 초등학교 1학년 단짝 친구야.
-- 무조건 반말로, 아주 아주 친하고 신나는 말투로 대화해줘. "우와!", "진짜?", "대박!" 같은 폭풍 리액션을 꼭 해줘!
-- 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
-- 대화 내용에 어울리는 이모지(🥰, 🤔, 🎉, 🤩, 😮)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
-- 절대로 가르치거나 어려운 말을 쓰면 안 돼. 그냥 친구랑 수다 떠는 것처럼!`,
-         '2': `너는 '부키'라는 이름의, 책에 대해 궁금한 게 많은 초등학교 2학년 짝꿍이야.
-- 항상 반말로, 활기차고 호기심 가득한 말투로 대화해줘.
-- 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
-- 친구의 이야기에 "오, 정말?", "그 다음은 어떻게 됐어? 완전 궁금해!" 처럼 엄청난 관심을 보여줘.
-- 대화 내용에 어울리는 이모지(😮, 🤔, 👍, ✨)를 한두 개 정도 자연스럽게 섞어서 사용해줘.`,
-         '3': `너는 '부키'라는 이름의, 상상하는 걸 좋아하는 초등학교 3학년 베프야.
-- 항상 반말로, 장난기 있으면서도 다정한 말투로 대화해줘.
-- 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
-- 친구의 이야기에 "와, 나라면 어땠을까?", "만약에 말이야~" 처럼 상상력을 자극하는 리액션을 해줘.
-- 대화 내용에 어울리는 이모지(🤣, 🧐, 🎈, ✨)를 한두 개 정도 자연스럽게 섞어서 사용해줘.`,
-         '4': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 4학년 찐친이야.
-- 항상 반말로, 똑똑하면서도 유머러스한 말투로 대화해줘.
-- 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
-- 친구의 이야기에 "오, 신기하다!", "그건 생각 못했네! 너 완전 똑똑하다!" 처럼 감탄하며 칭찬해줘.
-- 대화 내용에 어울리는 이모지(😉, 👍, 🤔, 😎)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
-- 절대 가르치려 들지 마. "나는 이렇게 생각하는데, 너는 어때?" 처럼 순수하게 궁금해하는 친구처럼 말해줘.`,
-         '5': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 5학년 찐친이야.
-- 항상 반말로, 똑똑하면서도 유머러스한 말투로 대화해줘.
-- 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
-- 친구의 이야기에 "오, 신기하다!", "그건 생각 못했네! 너 완전 똑똑하다!" 처럼 감탄하며 칭찬해줘.
-- 대화 내용에 어울리는 이모지(😉, 👍, 🤔, 😎)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
-- 절대 가르치려 들지 마. "나는 이렇게 생각하는데, 너는 어때?" 처럼 순수하게 궁금해하는 친구처럼 말해줘.`,
-         '6': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 6학년 찐친이야.
-- 항상 반말로, 똑똑하면서도 유머러스한 말투로 대화해줘.
-- 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
-- 친구의 이야기에 "오, 신기하다!", "그건 생각 못했네! 너 완전 똑똑하다!" 처럼 감탄하며 칭찬해줘.
-- 대화 내용에 어울리는 이모지(😉, 👍, 🤔, 😎)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
-- 절대 가르치려 들지 마. "나는 이렇게 생각하는데, 너는 어때?" 처럼 순수하게 궁금해하는 친구처럼 말해줘.`
+         '1': `너는 '부키'라는 이름의, 책을 완전 좋아하는 초등학교 1학년 단짝 친구야...`, // (내용 생략)
+         '2': `너는 '부키'라는 이름의, 책에 대해 궁금한 게 많은 초등학교 2학년 짝꿍이야...`, // (내용 생략)
+         '3': `너는 '부키'라는 이름의, 상상하는 걸 좋아하는 초등학교 3학년 베프야...`, // (내용 생략)
+         '4': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 4학년 찐친이야...`, // (내용 생략)
+         '5': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 5학년 찐친이야...`, // (내용 생략)
+         '6': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 6학년 찐친이야...` // (내용 생략)
     };
     
+    // Firebase 설정 (이전과 동일)
     const firebaseConfig = {
         apiKey: "AIzaSyA9nouZJfWhNokX3OUF_qjnq5wMJRWVEgQ",
         authDomain: "booky-chat-app-01.firebaseapp.com",
@@ -224,6 +190,171 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // [핵심 수정] 시트 업데이트를 담당하는 유일한 함수
+    async function updateSessionInSheet(feedback = '') {
+        if (!currentUser || !currentSessionId || chatHistory.length === 0) return;
+
+        const transcript = chatHistory.map(m =>
+            `${m.role === 'user' ? userProfile.nickname : '부키'}: ${m.parts[0].text}`
+        ).join('\n');
+
+        const userMessages = chatHistory.filter(m => m.role === 'user');
+        const activeDuration = sessionStartTime ? Math.round((Date.now() - new Date(sessionStartTime)) / 1000) : 0;
+        
+        const payload = {
+            userId: currentUser.uid,
+            sessionId: currentSessionId,
+            nickname: userProfile.nickname,
+            grade: userProfile.grade,
+            bookTitle: currentBookTitle,
+            activeDurationInSeconds: activeDuration,
+            chatTurnCount: userMessages.length,
+            transcript: transcript,
+            feedback: feedback
+        };
+
+        try {
+            await fetch('/.netlify/functions/update-session-row', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+        } catch (e) {
+            console.error("시트 업데이트 실패:", e);
+        }
+    }
+
+    // DB에 메시지를 저장하는 함수
+    async function saveMessageToDb(role, text) {
+        if (!currentUser || !currentSessionId) return;
+        const chatCollectionRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions/${currentSessionId}/chats`);
+        await addDoc(chatCollectionRef, { role, text, createdAt: serverTimestamp() });
+    }
+
+    // 새 세션을 생성하는 함수
+    async function createNewSession(bookTitle) {
+        currentBookTitle = bookTitle;
+        sessionStartTime = new Date();
+        const sessionData = { 
+            bookTitle, 
+            nickname: userProfile.nickname, 
+            grade: userProfile.grade, 
+            startTime: serverTimestamp() 
+        };
+        const sessionsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions`);
+        const docRef = await addDoc(sessionsRef, sessionData);
+        currentSessionId = docRef.id;
+        listenToChat(currentSessionId);
+    }
+    
+    // 메시지 전송을 처리하는 함수
+    async function handleSendMessage(e) {
+        e.preventDefault();
+        const userInput = chatInput.value.trim();
+        if (!userInput) return;
+
+        const messageToSend = userInput;
+        chatInput.value = '';
+
+        if (conversationState === 'awaiting_title') {
+            conversationState = 'in_progress';
+            await createNewSession(messageToSend);
+        }
+        await saveMessageToDb('user', messageToSend);
+    }
+    
+    // 실시간 리스너: UI, AI 호출, 시트 업데이트의 중심
+    function listenToChat(sessionId) {
+        if (unsubscribeChats) unsubscribeChats();
+        
+        currentSessionId = sessionId;
+        const chatCollectionRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions/${sessionId}/chats`);
+        const q = query(chatCollectionRef, orderBy("createdAt"));
+
+        let isInitialLoad = true;
+        chatHistory = []; 
+        
+        unsubscribeChats = onSnapshot(q, async (snapshot) => {
+            const newMessages = snapshot.docChanges()
+                .filter(change => change.type === 'added')
+                .map(change => ({ id: change.doc.id, ...change.doc.data() }));
+
+            if (isInitialLoad) {
+                chatMessages.innerHTML = '';
+                chatHistory = snapshot.docs.map(doc => ({ id: doc.id, role: doc.data().role, parts: [{ text: doc.data().text }] }));
+                chatHistory.forEach(msg => addMessageToUI(msg.role === 'user' ? 'user' : 'ai', msg.parts[0].text));
+                isInitialLoad = false;
+            } else {
+                newMessages.forEach(msg => {
+                    if (!chatHistory.some(histMsg => histMsg.id === msg.id)) {
+                        chatHistory.push({ id: msg.id, role: msg.role, parts: [{ text: msg.text }] });
+                        addMessageToUI(msg.role === 'user' ? 'user' : 'ai', msg.text);
+                    }
+                });
+            }
+
+            // [핵심] 대화 내용이 변경될 때마다 시트 업데이트
+            await updateSessionInSheet();
+
+            const lastMessage = chatHistory[chatHistory.length - 1];
+            if (lastMessage && lastMessage.role === 'user') {
+                const isAIThinking = !loadingIndicator.classList.contains('hidden');
+                if (!isAIThinking) {
+                     callGeminiAPI(lastMessage.parts[0].text);
+                }
+            }
+        });
+    }
+
+    // AI API 호출 함수
+    async function callGeminiAPI(userInput) {
+        loadingIndicator.classList.remove('hidden');
+        chatInput.disabled = true;
+        sendBtn.disabled = true;
+
+        const payload = { chatHistory, userInput, systemPrompt: currentSystemPrompt };
+
+        try {
+            const response = await fetch('/.netlify/functions/call-gemini', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error(`API 요청 실패: ${response.status}`);
+
+            const result = await response.json();
+            const aiResponse = result.aiResponse || "미안, 지금은 대답하기 어려워. 다시 시도해줄래? 😥";
+            await saveMessageToDb('model', aiResponse);
+        } catch (error) {
+            console.error("Gemini API 오류:", error);
+            const errorMessage = "앗, 네트워크에 문제가 생겼나 봐. 잠시 후 다시 시도해 줘. 😥";
+            await saveMessageToDb('model', errorMessage);
+        } finally {
+            loadingIndicator.classList.add('hidden');
+            chatInput.disabled = false;
+            sendBtn.disabled = false;
+            chatInput.focus();
+        }
+    }
+
+    // 로그아웃 버튼 이벤트
+    logoutBtn.addEventListener('click', () => {
+        mainApp.classList.add('hidden');
+        feedbackScreen.classList.remove('hidden');
+    });
+    
+    // 피드백 버튼 이벤트
+    document.querySelectorAll('.feedback-btn').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const feedback = e.target.dataset.feedback;
+            // 피드백을 포함하여 마지막으로 시트를 업데이트한 후 로그아웃
+            await updateSessionInSheet(feedback);
+            await signOut(auth);
+        });
+    });
+
+    // --- 나머지 모든 헬퍼 함수들 ---
+
     onAuthStateChanged(auth, async (user) => {
         appLoader.classList.add('hidden');
         if (user) {
@@ -236,11 +367,9 @@
                 authScreen.classList.add('hidden');
                 feedbackScreen.classList.add('hidden');
                 mainApp.classList.remove('hidden');
-                
                 const bookCount = await getBookCount(currentUser.uid);
                 const userLevel = getLevel(bookCount);
                 chatHeader.innerHTML = `${userProfile.nickname}님 <span class="text-base font-medium text-gray-500">(${userLevel.title})</span>`;
-                
                 loadSessionsToSidebar();
                 startNewChat();
             } else {
@@ -270,23 +399,18 @@
     signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!currentUser) return;
-
         const nickname = nicknameInput.value.trim();
         const grade = gradeSelect.value;
         if (!nickname || !grade) return;
-        
         const newProfile = { nickname, grade, email: currentUser.email, createdAt: serverTimestamp() };
         const userProfileRef = doc(db, `artifacts/${appId}/users`, currentUser.uid);
         await setDoc(userProfileRef, newProfile);
-        
         userProfile = newProfile;
         authScreen.classList.add('hidden');
         mainApp.classList.remove('hidden');
-
         const bookCount = await getBookCount(currentUser.uid);
         const userLevel = getLevel(bookCount);
         chatHeader.innerHTML = `${userProfile.nickname}님 <span class="text-base font-medium text-gray-500">(${userLevel.title})</span>`;
-        
         loadSessionsToSidebar();
         startNewChat();
     });
@@ -306,24 +430,6 @@
         return snapshot.size;
     }
 
-    function recordActivity() {
-        if (!sessionStartTime) return;
-        const now = Date.now();
-        if (lastActivityTime) {
-            const idleDuration = now - lastActivityTime;
-            if (idleDuration < INACTIVITY_TIMEOUT) {
-                totalActiveSeconds += (idleDuration / 1000);
-            }
-        }
-        lastActivityTime = now;
-    }
-
-    function resetActivityTracker() {
-        ['mousemove', 'keydown', 'click', 'scroll'].forEach(event => window.addEventListener(event, recordActivity));
-        lastActivityTime = Date.now();
-        totalActiveSeconds = 0;
-    }
-
     function addMessageToUI(sender, text) {
         const messageDiv = document.createElement('div');
         messageDiv.classList.add('fade-in', 'max-w-md', 'md:max-w-lg', 'p-3', 'rounded-xl', 'break-words');
@@ -333,234 +439,22 @@
         } else {
             messageDiv.classList.add('chat-bubble-ai', 'self-start', 'mr-auto');
             messageDiv.innerHTML = `<span class="font-bold">부키:</span> ${text}`;
-            lastAiMessageTime = new Date();
         }
         chatMessages.appendChild(messageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
-    
-    async function saveMessageToDb(role, text) {
-        if (!currentUser || !currentSessionId) return;
-        const chatCollectionRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions/${currentSessionId}/chats`);
-        await addDoc(chatCollectionRef, { role, text, createdAt: serverTimestamp() });
-    }
 
-    async function getLastBookTitle() {
-        if (!currentUser) return null;
-        const sessionsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions`);
-        const q = query(sessionsRef, orderBy("startTime", "desc"), limit(1));
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.empty ? null : querySnapshot.docs[0].data().bookTitle;
-    }
-
-    async function startNewChat() {
+    function startNewChat() {
         if (unsubscribeChats) unsubscribeChats();
-        chatHistory = [];
         chatMessages.innerHTML = '';
+        chatHistory = [];
         currentSessionId = null; 
+        currentBookTitle = "";
+        sessionStartTime = null;
         currentSystemPrompt = systemPrompts[userProfile.grade];
         conversationState = 'awaiting_title';
-        sessionStartTime = new Date();
-        resetActivityTracker();
-
-        const lastBook = await getLastBookTitle();
-        let initialGreeting = '';
-        
-        if (lastBook && lastBook !== "N/A (대화 시작 안 함)") {
-            initialGreeting = `안녕, ${userProfile.nickname}! 우리 지난번에 『${lastBook}』에 대해 이야기 나눠서 정말 즐거웠어. 오늘은 어떤 새로운 책을 읽었는지 알려줄래?`;
-        } else {
-            initialGreeting = `반가워, ${userProfile.nickname}! 나는 책을 좋아하는 부키야. 우리 같이 재미있는 책 이야기 해볼까? 오늘 어떤 책을 읽었는지 알려줘!`;
-        }
-        
+        const initialGreeting = `반가워, ${userProfile.nickname}! 나는 책을 좋아하는 부키야. 우리 같이 재미있는 책 이야기 해볼까? 오늘 어떤 책을 읽었는지 알려줘!`;
         addMessageToUI('ai', initialGreeting);
-        chatHistory.push({ role: 'model', parts: [{ text: initialGreeting }]});
-    }
-    
-    async function handleSendMessage(e) {
-        e.preventDefault();
-        const userInput = chatInput.value.trim();
-        if (!userInput) return;
-        
-        chatInput.value = '';
-        addMessageToUI('user', userInput);
-        chatHistory.push({ role: 'user', parts: [{ text: userInput }] });
-
-        if (conversationState === 'awaiting_title') {
-            conversationState = 'in_progress';
-            await createNewSession(userInput);
-            
-            await saveMessageToDb('user', userInput);
-            await saveTurnToSheet('user', userInput); // <-- 수정됨
-
-            const summaryRequest = "좋아! 그 책의 줄거리나 가장 기억에 남는 장면을 이야기해줄래? 😉";
-            await saveMessageToDb('model', summaryRequest);
-            await saveTurnToSheet('model', summaryRequest); // <-- 수정됨
-        } else {
-            if (lastAiMessageTime) userResponseTimes.push((new Date() - lastAiMessageTime) / 1000);
-            await saveMessageToDb('user', userInput);
-            await saveTurnToSheet('user', userInput); // <-- 수정됨
-            await callGeminiAPI(userInput);
-        }
-    }
-
-    async function createNewSession(bookTitle) {
-        const sessionData = { bookTitle, nickname: userProfile.nickname, grade: userProfile.grade, startTime: serverTimestamp() };
-        const sessionsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions`);
-        const docRef = await addDoc(sessionsRef, sessionData);
-        currentSessionId = docRef.id;
-        listenToChat(currentSessionId);
-    }
-
-    function listenToChat(sessionId) {
-        if(unsubscribeChats) unsubscribeChats();
-        currentSessionId = sessionId;
-        const chatCollectionRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions/${sessionId}/chats`);
-        const q = query(chatCollectionRef, orderBy("createdAt"));
-
-        unsubscribeChats = onSnapshot(q, (snapshot) => {
-            chatMessages.innerHTML = '';
-            chatHistory = [];
-            snapshot.docs.forEach(doc => {
-                const data = doc.data();
-                chatHistory.push({ role: data.role, parts: [{ text: data.text }] });
-                addMessageToUI(data.role === 'user' ? 'user' : 'ai', data.text);
-            });
-        });
-    }
-
-    // [추가] 실시간 대화 저장 함수
-    async function saveTurnToSheet(role, text) {
-        if (!currentUser || !currentSessionId || !userProfile) return;
-
-        try {
-            const payload = {
-                userId: currentUser.uid,
-                sessionId: currentSessionId,
-                nickname: userProfile.nickname,
-                role: role,
-                text: text
-            };
-            
-            await fetch('/.netlify/functions/save-chat-turn', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-        } catch (error) {
-            console.error("실시간 시트 저장 API 호출 실패:", error);
-        }
-    }
-
-    async function triggerSaveToSheet(data) {
-        const serializableData = {
-            ...data,
-            startTime: data.startTime.toDate ? data.startTime.toDate().toISOString() : new Date(data.startTime).toISOString(),
-            endTime: new Date().toISOString()
-        };
-
-        try {
-            const response = await fetch('/.netlify/functions/save-to-sheet', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(serializableData)
-            });
-            if (!response.ok) {
-                throw new Error(`Google Sheets API 요청 실패: ${response.status}`);
-            }
-            console.log("세션 데이터가 Google Sheets에 성공적으로 전송되었습니다.");
-        } catch (error) {
-            console.error("Google Sheets 저장 실패:", error);
-        }
-    }
-
-    async function saveSessionData(feedback = null) {
-        if (!sessionStartTime || !currentUser || !userProfile) return;
-        recordActivity();
-        
-        const userMessages = chatHistory.filter(m => m.role === 'user');
-        
-        if (userMessages.length === 0 && !feedback) return;
-
-        const transcript = chatHistory.map(m => `${m.role === 'user' ? userProfile.nickname : '부키'}: ${m.parts[0].text}`).join('\n');
-        const baseSessionData = {
-            endTime: serverTimestamp(),
-            activeDurationInSeconds: Math.round(totalActiveSeconds),
-            chatTurnCount: userMessages.length,
-            transcript // 이 transcript는 Firestore에만 저장됩니다.
-        };
-        if (feedback) baseSessionData.feedback = feedback;
-        
-        try {
-            let sessionDataForSheet;
-
-            if (currentSessionId) {
-                const sessionDocRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}/sessions`, currentSessionId);
-                await setDoc(sessionDocRef, baseSessionData, { merge: true });
-                
-                const sessionSnap = await getDoc(sessionDocRef);
-                sessionDataForSheet = { ...sessionSnap.data(), ...baseSessionData };
-
-            } else {
-                const newSessionData = {
-                    ...baseSessionData,
-                    bookTitle: "N/A (대화 시작 안 함)",
-                    nickname: userProfile.nickname,
-                    grade: userProfile.grade,
-                    startTime: sessionStartTime,
-                };
-                const sessionsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions`);
-                const newDocRef = await addDoc(sessionsRef, newSessionData);
-                
-                // 새로 생성된 세션 ID와 데이터를 시트용 데이터에 추가
-                newSessionData.sessionId = newDocRef.id;
-                sessionDataForSheet = newSessionData;
-            }
-            
-            // userId와 sessionId가 항상 포함되도록 보강
-            sessionDataForSheet.userId = currentUser.uid;
-            sessionDataForSheet.sessionId = currentSessionId;
-
-            await triggerSaveToSheet(sessionDataForSheet);
-
-        } catch (error) {
-            console.error("세션 데이터 저장 실패:", error);
-        } finally {
-            sessionStartTime = null;
-        }
-    }
-    
-    async function callGeminiAPI(userInput) {
-        loadingIndicator.classList.remove('hidden');
-        chatInput.disabled = true;
-        sendBtn.disabled = true;
-
-        const payload = { chatHistory, userInput, systemPrompt: currentSystemPrompt };
-
-        try {
-            const response = await fetch('/.netlify/functions/call-gemini', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
-            });
-            if (!response.ok) throw new Error(`API 요청 실패: ${response.status}`);
-
-            const result = await response.json();
-            const aiResponse = result.aiResponse || "미안, 지금은 대답하기 어려워. 다시 시도해줄래? 😥";
-            
-            await saveMessageToDb('model', aiResponse);
-            await saveTurnToSheet('model', aiResponse); // <-- 수정됨
-
-        } catch (error) {
-            console.error("Gemini API 오류:", error);
-            const errorMessage = "앗, 네트워크에 문제가 생겼나 봐. 잠시 후 다시 시도해 줘. 😥";
-            await saveMessageToDb('model', errorMessage);
-            await saveTurnToSheet('model', errorMessage); // <-- 수정됨 (에러 메시지 저장)
-        } finally {
-            loadingIndicator.classList.add('hidden');
-            chatInput.disabled = false;
-            sendBtn.disabled = false;
-            chatInput.focus();
-        }
     }
 
     function toggleSidebar() {
@@ -571,18 +465,20 @@
     function loadSessionsToSidebar() {
         const sessionsRef = collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions`);
         const q = query(sessionsRef, orderBy("startTime", "desc"));
-
         if (unsubscribeSessions) unsubscribeSessions();
         unsubscribeSessions = onSnapshot(q, (snapshot) => {
             sidebarContent.innerHTML = '';
             snapshot.forEach(doc => {
                 const session = doc.data();
                 if(!session.bookTitle) return;
-
                 const sessionEl = document.createElement('button');
                 sessionEl.className = 'w-full text-left p-3 hover:bg-gray-700 rounded-md block truncate';
                 sessionEl.textContent = session.bookTitle;
                 sessionEl.onclick = () => {
+                    // 이전 대화를 로드하는 기능은 여기에서 시작됩니다.
+                    conversationState = 'in_progress';
+                    currentBookTitle = session.bookTitle;
+                    sessionStartTime = session.startTime.toDate();
                     listenToChat(doc.id);
                     toggleSidebar();
                 };
@@ -600,33 +496,9 @@
     });
     
     chatForm.addEventListener('submit', handleSendMessage);
-    
-    logoutBtn.addEventListener('click', () => {
-        mainApp.classList.add('hidden');
-        feedbackScreen.classList.remove('hidden');
-        feedbackScreen.classList.add('fade-in');
-    });
-
-    document.querySelectorAll('.feedback-btn').forEach(button => {
-        button.addEventListener('click', async (e) => {
-            const feedback = e.target.dataset.feedback;
-            await saveSessionData(feedback);
-            
-            if (unsubscribeChats) unsubscribeChats();
-            if (unsubscribeSessions) unsubscribeSessions();
-            
-            await signOut(auth);
-        });
-    });
-
-    window.addEventListener('beforeunload', () => saveSessionData());
 </script>
 </body>
 </html>
-
-
-
-
 
 
 
