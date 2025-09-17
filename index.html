@@ -313,7 +313,8 @@
         sendBtn.disabled = true;
         
         const cleanedChatHistory = chatHistory.map(({ role, parts }) => ({ role, parts }));
-        const payload = { chatHistory, userInput, systemPrompt: currentSystemPrompt };
+        
+        const payload = { chatHistory: cleanedChatHistory, userInput, systemPrompt: currentSystemPrompt };
 
         try {
             const response = await fetch('/.netlify/functions/call-gemini', {
@@ -500,6 +501,7 @@
 </script>
 </body>
 </html>
+
 
 
 
