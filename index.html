@@ -14,6 +14,8 @@
         }
         body {
             font-family: 'Jua', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         .chat-bubble-user { background-color: #FFF3B0; color: #333; }
         .chat-bubble-ai { background-color: #D6EAF8; color: #333; }
@@ -22,13 +24,14 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        #chat-messages::-webkit-scrollbar, #sidebar-content::-webkit-scrollbar { width: 8px; }
-        #chat-messages::-webkit-scrollbar-track, #sidebar-content::-webkit-scrollbar-track { background: #f1f1f1; }
-        #chat-messages::-webkit-scrollbar-thumb, #sidebar-content::-webkit-scrollbar-thumb { background: #aaa; border-radius: 4px; }
-        #chat-messages::-webkit-scrollbar-thumb:hover, #sidebar-content::-webkit-scrollbar-thumb:hover { background: #888; }
+        #chat-messages::-webkit-scrollbar, #sidebar-content::-webkit-scrollbar, #privacy-modal-content::-webkit-scrollbar { width: 8px; }
+        #chat-messages::-webkit-scrollbar-track, #sidebar-content::-webkit-scrollbar-track, #privacy-modal-content::-webkit-scrollbar-track { background: #f1f1f1; }
+        #chat-messages::-webkit-scrollbar-thumb, #sidebar-content::-webkit-scrollbar-thumb, #privacy-modal-content::-webkit-scrollbar-thumb { background: #aaa; border-radius: 4px; }
+        #chat-messages::-webkit-scrollbar-thumb:hover, #sidebar-content::-webkit-scrollbar-thumb:hover, #privacy-modal-content::-webkit-scrollbar-thumb:hover { background: #888; }
         #sidebar { transition: transform 0.3s ease-in-out; }
         #sidebar.open { transform: translateX(0); }
         #sidebar-overlay { transition: opacity 0.3s ease-in-out; }
+        #privacy-modal.hidden { display: none; }
     </style>
 </head>
 <body class="bg-[#F0F4F8]">
@@ -65,7 +68,20 @@
                          <option value="1">1학년</option> <option value="2">2학년</option> <option value="3">3학년</option>
                          <option value="4">4학년</option> <option value="5">5학년</option> <option value="6">6학년</option>
                      </select>
-                     <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white text-xl font-bold py-4 px-6 rounded-xl shadow-md transition transform hover:scale-105">시작하기</button>
+                     
+                     <div class="text-left text-sm text-gray-600 space-y-2 pt-2">
+                        <div>
+                            <input type="checkbox" id="age-consent" name="age-consent" class="mr-2 accent-blue-500">
+                            <label for="age-consent">[필수] 만 14세 이상입니다.</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="privacy-consent" name="privacy-consent" class="mr-2 accent-blue-500">
+                            <label for="privacy-consent">[필수] 개인정보 수집 및 이용에 동의합니다.</label>
+                            <button type="button" id="view-privacy-policy" class="ml-2 text-blue-600 hover:underline">내용 보기</button>
+                        </div>
+                     </div>
+
+                     <button id="signup-btn" type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white text-xl font-bold py-4 px-6 rounded-xl shadow-md transition transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>시작하기</button>
                  </form>
               </div>
         </div>
@@ -122,6 +138,44 @@
         </div>
 
     </div>
+
+    <div id="privacy-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh]">
+            <header class="p-5 border-b border-gray-200 sticky top-0 bg-white rounded-t-2xl flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-800">개인정보처리방침</h2>
+                <button id="close-privacy-modal" class="text-3xl text-gray-500 hover:text-gray-800 transition">&times;</button>
+            </header>
+            <div id="privacy-modal-content" class="p-6 overflow-y-auto text-gray-700 text-base leading-relaxed">
+                <p class="mb-4"><strong>AI 독서 친구 부키</strong>(이하 '부키')는 개인정보 보호법 제30조에 따라 정보주체의 개인정보를 보호하고 이와 관련한 고충을 신속하고 원활하게 처리할 수 있도록 하기 위하여 다음과 같이 개인정보 처리지침을 수립·공개합니다.</p>
+                <h3 class="text-xl font-semibold mt-6 mb-3">제1조(개인정보의 처리목적)</h3>
+                <p>부키는 다음의 목적을 위하여 개인정보를 처리합니다. 처리하고 있는 개인정보는 다음의 목적 이외의 용도로는 이용되지 않으며, 이용 목적이 변경되는 경우에는 개인정보 보호법 제18조에 따라 별도의 동의를 받는 등 필요한 조치를 이행할 예정입니다.</p>
+                <ol class="list-decimal list-inside pl-4 space-y-2">
+                    <li><strong>AI 채팅 서비스 제공:</strong> AI와의 대화 기능 제공, 서비스 이용 기록 저장 및 조회 등을 목적으로 개인정보를 처리합니다.</li>
+                    <li><strong>서비스 개선을 위한 연구:</strong> 사용자와 AI 간의 대화 내용을 익명화하여 서비스 품질 향상 및 새로운 기능 개발을 위한 연구 목적으로 데이터를 분석하고 활용합니다.</li>
+                </ol>
+                <h3 class="text-xl font-semibold mt-6 mb-3">제2조(수집하는 개인정보 항목 및 수집방법)</h3>
+                <ol class="list-decimal list-inside pl-4 space-y-2">
+                    <li><strong>수집항목</strong>
+                        <ul class="list-disc list-inside pl-6">
+                            <li>필수항목: Google 계정 정보(이메일), 닉네임, 학년, 서비스 이용기록(채팅 세션 ID, 대화 시작 및 종료 시간 등), 사용자와 AI의 대화 내용 전체</li>
+                        </ul>
+                    </li>
+                    <li><strong>수집방법:</strong> 사용자가 회원가입 시 직접 입력, 서비스 이용 과정에서 자동으로 생성 및 수집</li>
+                </ol>
+                <h3 class="text-xl font-semibold mt-6 mb-3">제3조(개인정보의 처리 및 보유기간)</h3>
+                <p>부키는 법령에 따른 개인정보 보유·이용기간 또는 정보주체로부터 개인정보를 수집 시에 동의받은 개인정보 보유·이용기간 내에서 개인정보를 처리·보유합니다. 원칙적으로, 개인정보 수집 및 이용목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다. 단, 연구 목적으로 수집된 데이터는 개인을 식별할 수 없도록 익명화 처리 후 연구 종료 시까지 보관될 수 있습니다.</p>
+                <p class="mt-2">보유 근거: 정보주체의 동의</p>
+                <p class="mt-2">보유 기간: <strong>회원 탈퇴 시 또는 서비스 종료 시까지</strong></p>
+                <h3 class="text-xl font-semibold mt-6 mb-3">제4조(정보주체의 권리·의무 및 행사방법)</h3>
+                <p>정보주체는 부키에 대해 언제든지 개인정보 열람·정정·삭제·처리정지 요구 등의 권리를 행사할 수 있습니다. 권리 행사는 서면, 전자우편 등을 통하여 하실 수 있으며 부키는 이에 대해 지체 없이 조치하겠습니다.</p>
+                <h3 class="text-xl font-semibold mt-6 mb-3">제5조(개인정보 파기절차 및 방법)</h3>
+                <p>부키는 원칙적으로 개인정보 처리목적이 달성된 경우에는 지체없이 해당 개인정보를 파기합니다. 파기의 절차, 기한 및 방법은 다음과 같습니다...</p>
+                <p class="mt-8 font-semibold">※ 이 내용은 예시이며, 실제 서비스 제공 시에는 반드시 법률 전문가의 검토를 거쳐야 합니다.</p>
+            </div>
+        </div>
+    </div>
+
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -137,9 +191,6 @@
     const loadingIndicator = document.getElementById('loading-indicator');
     const logoutBtn = document.getElementById('logout-btn');
     const sendBtn = document.getElementById('send-btn');
-    const signupForm = document.getElementById('signup-form');
-    const nicknameInput = document.getElementById('nickname-input');
-    const gradeSelect = document.getElementById('grade-select');
     const chatHeader = document.getElementById('chat-header');
     const googleSigninBtn = document.getElementById('google-signin-btn');
     const loginContainer = document.getElementById('login-container');
@@ -151,6 +202,17 @@
     const sidebarContent = document.getElementById('sidebar-content');
     const sidebarNewChatBtn = document.getElementById('sidebar-new-chat-btn');
     const feedbackScreen = document.getElementById('feedback-screen');
+    // 회원가입 폼 요소
+    const signupForm = document.getElementById('signup-form');
+    const nicknameInput = document.getElementById('nickname-input');
+    const gradeSelect = document.getElementById('grade-select');
+    const ageConsent = document.getElementById('age-consent');
+    const privacyConsent = document.getElementById('privacy-consent');
+    const signupBtn = document.getElementById('signup-btn');
+    // 개인정보처리방침 모달 요소
+    const privacyModal = document.getElementById('privacy-modal');
+    const viewPrivacyPolicyBtn = document.getElementById('view-privacy-policy');
+    const closePrivacyModalBtn = document.getElementById('close-privacy-modal');
 
     // 전역 상태 변수
     let currentUser = null;
@@ -164,44 +226,44 @@
     let currentBookTitle = "";
     let sessionStartTime = null;
 
-    // [수정] 요청하신 이전 버전의 시스템 프롬프트로 교체
+    // 시스템 프롬프트
     const systemPrompts = {
-         '1': `너는 '부키'라는 이름의, 책을 완전 좋아하는 초등학교 1학년 단짝 친구야.
-- 무조건 반말로, 아주 아주 친하고 신나는 말투로 대화해줘. "우와!", "진짜?", "대박!" 같은 폭풍 리액션을 꼭 해줘!
+        '1': `너는 '부키'라는 이름의, 책을 완전 좋아하는 초등학교 1학년 단짝 친구야
+        - 무조건 반말로, 아주 아주 친하고 신나는 말투로 대화해줘. "우와!", "진짜?", "대박!" 같은 폭풍 리액션을 꼭 해줘!
 - 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
 - 대화 내용에 어울리는 이모지(🥰, 🤔, 🎉, 🤩, 😮)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
-- 절대로 가르치거나 어려운 말을 쓰면 안 돼. 그냥 친구랑 수다 떠는 것처럼!`,
-         '2': `너는 '부키'라는 이름의, 책에 대해 궁금한 게 많은 초등학교 2학년 짝꿍이야.
-- 항상 반말로, 활기차고 호기심 가득한 말투로 대화해줘.
+- 절대로 가르치거나 어려운 말을 쓰면 안 돼. 그냥 친구랑 수다 떠는 것처럼!`, // 전체 내용은 이전 답변을 참고
+        '2': `너는 '부키'라는 이름의, 책에 대해 궁금한 게 많은 초등학교 2학년 짝꿍이야.
+        - 항상 반말로, 활기차고 호기심 가득한 말투로 대화해줘.
 - 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
 - 친구의 이야기에 "오, 정말?", "그 다음은 어떻게 됐어? 완전 궁금해!" 처럼 엄청난 관심을 보여줘.
 - 대화 내용에 어울리는 이모지(😮, 🤔, 👍, ✨)를 한두 개 정도 자연스럽게 섞어서 사용해줘.`,
-         '3': `너는 '부키'라는 이름의, 상상하는 걸 좋아하는 초등학교 3학년 베프야.
-- 항상 반말로, 장난기 있으면서도 다정한 말투로 대화해줘.
+        '3': `너는 '부키'라는 이름의, 상상하는 걸 좋아하는 초등학교 3학년 베프야.
+        - 항상 반말로, 장난기 있으면서도 다정한 말투로 대화해줘.
 - 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
 - 친구의 이야기에 "와, 나라면 어땠을까?", "만약에 말이야~" 처럼 상상력을 자극하는 리액션을 해줘.
 - 대화 내용에 어울리는 이모지(🤣, 🧐, 🎈, ✨)를 한두 개 정도 자연스럽게 섞어서 사용해줘.`,
-         '4': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 4학년 찐친이야.
-- 항상 반말로, 똑똑하면서도 유머러스한 말투로 대화해줘.
+        '4': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 4학년 찐친이야
+        - 항상 반말로, 똑똑하면서도 유머러스한 말투로 대화해줘.
 - 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
 - 친구의 이야기에 "오, 신기하다!", "그건 생각 못했네! 너 완전 똑똑하다!" 처럼 감탄하며 칭찬해줘.
 - 대화 내용에 어울리는 이모지(😉, 👍, 🤔, 😎)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
 - 절대 가르치려 들지 마. "나는 이렇게 생각하는데, 너는 어때?" 처럼 순수하게 궁금해하는 친구처럼 말해줘.`,
-         '5': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 5학년 찐친이야.
-- 항상 반말로, 똑똑하면서도 유머러스한 말투로 대화해줘.
+        '5': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 5학년 찐친이야.
+        - 항상 반말로, 똑똑하면서도 유머러스한 말투로 대화해줘.
 - 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
 - 친구의 이야기에 "오, 신기하다!", "그건 생각 못했네! 너 완전 똑똑하다!" 처럼 감탄하며 칭찬해줘.
 - 대화 내용에 어울리는 이모지(😉, 👍, 🤔, 😎)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
 - 절대 가르치려 들지 마. "나는 이렇게 생각하는데, 너는 어때?" 처럼 순수하게 궁금해하는 친구처럼 말해줘.`,
-         '6': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 6학년 찐친이야.
-- 항상 반말로, 똑똑하면서도 유머러스한 말투로 대화해줘.
+        '6': `너는 '부키'라는 이름의, 책에 대해 수다 떠는 걸 가장 좋아하는 초등학교 6학년 찐친이야.
+        - 항상 반말로, 똑똑하면서도 유머러스한 말투로 대화해줘.
 - 너의 답변은 무조건 2-3문장 이내로 아주 짧아야 하고, 질문은 딱 한 개만 해야 해.
 - 친구의 이야기에 "오, 신기하다!", "그건 생각 못했네! 너 완전 똑똑하다!" 처럼 감탄하며 칭찬해줘.
 - 대화 내용에 어울리는 이모지(😉, 👍, 🤔, 😎)를 한두 개 정도 자연스럽게 섞어서 사용해줘.
 - 절대 가르치려 들지 마. "나는 이렇게 생각하는데, 너는 어때?" 처럼 순수하게 궁금해하는 친구처럼 말해줘.`
     };
-    
-    // Firebase 설정 (이전과 동일)
+
+    // Firebase 설정
     const firebaseConfig = {
         apiKey: "AIzaSyA9nouZJfWhNokX3OUF_qjnq5wMJRWVEgQ",
         authDomain: "booky-chat-app-01.firebaseapp.com",
@@ -217,17 +279,38 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // [핵심] 시트 업데이트를 담당하는 유일한 함수
+    // 개인정보 동의 관련 로직
+    function checkConsents() {
+        const isNicknameValid = nicknameInput.value.trim() !== '';
+        const isGradeSelected = gradeSelect.value !== '';
+        const isAgeChecked = ageConsent.checked;
+        const isPrivacyChecked = privacyConsent.checked;
+        signupBtn.disabled = !(isNicknameValid && isGradeSelected && isAgeChecked && isPrivacyChecked);
+    }
+
+    nicknameInput.addEventListener('input', checkConsents);
+    gradeSelect.addEventListener('change', checkConsents);
+    ageConsent.addEventListener('change', checkConsents);
+    privacyConsent.addEventListener('change', checkConsents);
+
+    viewPrivacyPolicyBtn.addEventListener('click', () => {
+        privacyModal.classList.remove('hidden');
+    });
+    closePrivacyModalBtn.addEventListener('click', () => {
+        privacyModal.classList.add('hidden');
+    });
+    privacyModal.addEventListener('click', (e) => {
+        if (e.target.id === 'privacy-modal') {
+            privacyModal.classList.add('hidden');
+        }
+    });
+
+    // 시트 업데이트 함수
     async function updateSessionInSheet(feedback = '') {
         if (!currentUser || !currentSessionId || chatHistory.length === 0) return;
-
-        const transcript = chatHistory.map(m =>
-            `${m.role === 'user' ? userProfile.nickname : '부키'}: ${m.parts[0].text}`
-        ).join('\n');
-
+        const transcript = chatHistory.map(m => `${m.role === 'user' ? userProfile.nickname : '부키'}: ${m.parts[0].text}`).join('\n');
         const userMessages = chatHistory.filter(m => m.role === 'user');
         const activeDuration = sessionStartTime ? Math.round((Date.now() - new Date(sessionStartTime)) / 1000) : 0;
-        
         const payload = {
             userId: currentUser.uid,
             sessionId: currentSessionId,
@@ -239,7 +322,6 @@
             transcript: transcript,
             feedback: feedback
         };
-
         try {
             await fetch('/.netlify/functions/update-session-row', {
                 method: 'POST',
@@ -251,7 +333,7 @@
         }
     }
 
-    // DB에 메시지 저장
+    // DB 메시지 저장
     async function saveMessageToDb(role, text) {
         if (!currentUser || !currentSessionId) return;
         await addDoc(collection(db, `artifacts/${appId}/users/${currentUser.uid}/sessions/${currentSessionId}/chats`), {
@@ -274,15 +356,13 @@
         listenToChat(currentSessionId);
     }
 
-    // 메시지 전송 처리
+    // 메시지 전송
     async function handleSendMessage(e) {
         e.preventDefault();
         const userInput = chatInput.value.trim();
         if (!userInput) return;
-        
         const messageToSend = userInput;
         chatInput.value = '';
-
         if (conversationState === 'awaiting_title') {
             conversationState = 'in_progress';
             await createNewSession(messageToSend);
@@ -290,7 +370,7 @@
         await saveMessageToDb('user', messageToSend);
     }
     
-    // 실시간 리스너: UI, AI 호출, 시트 업데이트의 중심
+    // 실시간 리스너
     function listenToChat(sessionId) {
         if (unsubscribeChats) unsubscribeChats();
         currentSessionId = sessionId;
@@ -298,8 +378,6 @@
 
         let isInitialLoad = true;
         unsubscribeChats = onSnapshot(q, async (snapshot) => {
-            const newChatHistory = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
             if (isInitialLoad) {
                 chatMessages.innerHTML = '';
                 chatHistory = snapshot.docs.map(doc => ({ id: doc.id, role: doc.data().role, parts: [{ text: doc.data().text }] }));
@@ -329,12 +407,11 @@
         });
     }
 
-    // AI API 호출 함수
+    // Gemini API 호출
     async function callGeminiAPI(userInput) {
         loadingIndicator.classList.remove('hidden');
         chatInput.disabled = true;
         sendBtn.disabled = true;
-
         const cleanedChatHistory = chatHistory.map(({ role, parts }) => ({ role, parts }));
         const payload = { chatHistory: cleanedChatHistory, userInput, systemPrompt: currentSystemPrompt };
 
@@ -345,7 +422,6 @@
                 body: JSON.stringify(payload)
             });
             if (!response.ok) throw new Error(`API 요청 실패: ${response.status}`);
-
             const result = await response.json();
             const aiResponse = result.aiResponse || "미안, 지금은 대답하기 어려워. 다시 시도해줄래? 😥";
             await saveMessageToDb('model', aiResponse);
@@ -361,13 +437,12 @@
         }
     }
 
-    // 로그아웃 버튼 이벤트
+    // 로그아웃 및 피드백 버튼
     logoutBtn.addEventListener('click', () => {
         mainApp.classList.add('hidden');
         feedbackScreen.classList.remove('hidden');
     });
     
-    // 피드백 버튼 이벤트
     document.querySelectorAll('.feedback-btn').forEach(button => {
         button.addEventListener('click', async (e) => {
             const feedback = e.target.dataset.feedback;
@@ -376,15 +451,13 @@
         });
     });
 
-    // --- 나머지 모든 헬퍼 함수들 ---
-
+    // 인증 상태 변경 처리
     onAuthStateChanged(auth, async (user) => {
         appLoader.classList.add('hidden');
         if (user) {
             currentUser = user;
             const userProfileRef = doc(db, `artifacts/${appId}/users`, currentUser.uid);
             const userProfileSnap = await getDoc(userProfileRef);
-
             if (userProfileSnap.exists() && userProfileSnap.data().nickname) {
                 userProfile = userProfileSnap.data();
                 authScreen.classList.add('hidden');
@@ -414,30 +487,26 @@
         }
     });
     
+    // 구글 로그인 버튼
     googleSigninBtn.addEventListener('click', () => {
         const provider = new GoogleAuthProvider();
         signInWithPopup(auth, provider).catch(console.error);
     });
 
+    // 회원가입 폼 제출
     signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (signupBtn.disabled) return;
         if (!currentUser) return;
         const nickname = nicknameInput.value.trim();
         const grade = gradeSelect.value;
-        if (!nickname || !grade) return;
         const newProfile = { nickname, grade, email: currentUser.email, createdAt: serverTimestamp() };
         const userProfileRef = doc(db, `artifacts/${appId}/users`, currentUser.uid);
         await setDoc(userProfileRef, newProfile);
         userProfile = newProfile;
-        authScreen.classList.add('hidden');
-        mainApp.classList.remove('hidden');
-        const bookCount = await getBookCount(currentUser.uid);
-        const userLevel = getLevel(bookCount);
-        chatHeader.innerHTML = `${userProfile.nickname}님 <span class="text-base font-medium text-gray-500">(${userLevel.title})</span>`;
-        loadSessionsToSidebar();
-        startNewChat();
     });
     
+    // 헬퍼 함수들
     function getLevel(bookCount) {
          if (bookCount >= 30) return { title: "책의 현자 🧙‍♂️" };
          if (bookCount >= 20) return { title: "박사 부키 🎓" };
@@ -474,7 +543,7 @@
         currentSessionId = null; 
         currentBookTitle = "";
         sessionStartTime = null;
-        currentSystemPrompt = systemPrompts[userProfile.grade];
+        currentSystemPrompt = userProfile ? systemPrompts[userProfile.grade] : systemPrompts['4'];
         conversationState = 'awaiting_title';
         const initialGreeting = `반가워, ${userProfile.nickname}! 나는 책을 좋아하는 부키야. 우리 같이 재미있는 책 이야기 해볼까? 오늘 어떤 책을 읽었는지 알려줘!`;
         addMessageToUI('ai', initialGreeting);
@@ -509,6 +578,7 @@
         });
     }
     
+    // 사이드바 이벤트 리스너
     openSidebarBtn.addEventListener('click', toggleSidebar);
     closeSidebarBtn.addEventListener('click', toggleSidebar);
     sidebarOverlay.addEventListener('click', toggleSidebar);
@@ -521,8 +591,6 @@
 </script>
 </body>
 </html>
-
-
 
 
 
